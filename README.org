@@ -1,0 +1,14 @@
+* Youdao Dictionary interface for Emacs
+
+** Requirement
+- [[https://github.com/auto-complete/popup-el][popup-el]]
+- [[https://github.com/xuchunyang/chinese-word-at-point.el][chinese-word-at-point.el]]
+
+** Installation
+
+** Usage
+Below are commands you can use:
+- =youdao-dictionary-search-point= :: Search word at point and show result in echo area
+- =youdao-dictionary-search-point+= :: Search word at point and show result with popup widget
+- =youdao-dictionary-search-input= :: Search input word and show result in echo area
+- =youdao-dictionary-search-input+= :: Search input word and show result with popup widget
