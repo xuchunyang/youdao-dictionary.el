@@ -96,6 +96,7 @@
                  nil nil
                  current-word)))
 
+;;;###autoload
 (defun youdao-dictionary-search-point ()
   "Search word at point and display in echo area."
   (interactive)
@@ -104,6 +105,7 @@
              (thing-at-point 'chinese-or-other-word) ; TODO: deal with nil
              ))))
 
+;;;###autoload
 (defun youdao-dictionary-search-point+ ()
   "Search word at point and display in popup."
   (interactive)
@@ -111,14 +113,14 @@
               (youdao-dictionary--request-word
                (thing-at-point 'chinese-or-other-word) ; TODO: deal with nil
                ))))
-
+;;;###autoload
 (defun youdao-dictionary-search-input ()
   "Search input word and display in echo area."
   (interactive)
   (let ((word (youdao-dictionary--prompt-input)))
     (message (youdao-dictionary--translation
               (youdao-dictionary--request-word word)))))
-
+;;;###autoload
 (defun youdao-dictionary-search-input+ ()
   "Search input word and display in popup."
   (interactive)
