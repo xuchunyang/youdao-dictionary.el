@@ -100,33 +100,43 @@
 (defun youdao-dictionary-search-point ()
   "Search word at point and display in echo area."
   (interactive)
-  (message (youdao-dictionary--translation
-            (youdao-dictionary--request-word
-             (thing-at-point 'chinese-or-other-word) ; TODO: deal with nil
-             ))))
+  (let ((word (thing-at-point 'chinese-or-other-word)))
+    (if word
+        (message (youdao-dictionary--translation
+                  (youdao-dictionary--request-word
+                   (thing-at-point 'chinese-or-other-word))))
+      (message "No word at point."))))
 
 ;;;###autoload
 (defun youdao-dictionary-search-point+ ()
   "Search word at point and display in popup."
   (interactive)
-  (popup-tip (youdao-dictionary--translation
-              (youdao-dictionary--request-word
-               (thing-at-point 'chinese-or-other-word) ; TODO: deal with nil
-               ))))
+  (let ((word (thing-at-point 'chinese-or-other-word)))
+    (if word
+        (popup-tip (youdao-dictionary--translation
+                    (youdao-dictionary--request-word
+                     (thing-at-point 'chinese-or-other-word))))
+      (message "No word at point"))))
+
 ;;;###autoload
 (defun youdao-dictionary-search-input ()
   "Search input word and display in echo area."
   (interactive)
   (let ((word (youdao-dictionary--prompt-input)))
-    (message (youdao-dictionary--translation
-              (youdao-dictionary--request-word word)))))
+    (if (not (string= word ""))
+        (message (youdao-dictionary--translation
+                  (youdao-dictionary--request-word word)))
+      (message "No word inputted."))))
+
 ;;;###autoload
 (defun youdao-dictionary-search-input+ ()
   "Search input word and display in popup."
   (interactive)
   (let ((word (youdao-dictionary--prompt-input)))
-    (popup-tip (youdao-dictionary--translation
-                (youdao-dictionary--request-word word)))))
+    (if (not (string= word ""))
+        (popup-tip (youdao-dictionary--translation
+                    (youdao-dictionary--request-word word)))
+      (message "No word inputted."))))
 
 (provide 'youdao-dictionary)
 
