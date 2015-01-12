@@ -12,3 +12,4 @@ Below are commands you can use:
 - =youdao-dictionary-search-point+= :: Search word at point and show result with popup widget
 - =youdao-dictionary-search-input= :: Search input word and show result in echo area
 - =youdao-dictionary-search-input+= :: Search input word and show result with popup widget
+- =youdao-dictionary-search-and-replace= :: Search word at point and replace this word with popup menu

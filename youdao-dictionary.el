@@ -36,6 +36,8 @@
 ;; Search input word and show result in echo area
 ;; `youdao-dictionary-search-input+'
 ;; Search input word and show result with popup widget
+;; `youdao-dictionary-search-and-replace'
+;; Search word at point and replace this word with popup menu
 
 ;;; Installation:
 ;;
@@ -96,6 +98,12 @@
                  nil nil
                  current-word)))
 
+(defun youdao-dictionary--strip-explain (explain)
+  "Remove unneed info in EXPLAIN for replace.
+
+i.e. `[语][计] dictionary' => 'dictionary'."
+  (replace-regexp-in-string "^[[].* " "" explain))
+
 ;;;###autoload
 (defun youdao-dictionary-search-point ()
   "Search word at point and display in echo area."
@@ -137,6 +145,21 @@
         (popup-tip (youdao-dictionary--translation
                     (youdao-dictionary--request-word word)))
       (message "No word inputted."))))
+
+;;;###autoload
+(defun youdao-dictionary-search-and-replace ()
+  "Search word at point and replace this word with popup menu."
+  (interactive)
+  (let* ((bounds (bounds-of-thing-at-point 'chinese-or-other-word))
+         (beginning-of-word (car bounds))
+         (end-of-word (cdr bounds))
+         selected-item)
+    (insert (popup-menu* (mapcar 'youdao-dictionary--strip-explain
+                                 (append (youdao-dictionary--explains
+                                          (youdao-dictionary--request-word
+                                           (thing-at-point 'chinese-or-other-word)))
+                                         nil))))
+    (kill-region beginning-of-word end-of-word)))
 
 (provide 'youdao-dictionary)
 
