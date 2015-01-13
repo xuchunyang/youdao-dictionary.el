@@ -38,6 +38,12 @@
 ;; Search input word and show result with popup widget
 ;; `youdao-dictionary-search-and-replace'
 ;; Search word at point and replace this word with popup menu
+;;
+;; Tips:
+;;
+;; If current region is active, region string will be translated, otherwise
+;; translate word around point.
+;;
 
 ;;; Installation:
 ;;
@@ -92,7 +98,7 @@
 
 (defun youdao-dictionary--prompt-input ()
   "Prompt input object for translate."
-  (let ((current-word (thing-at-point 'chinese-or-other-word)))
+  (let ((current-word (youdao-dictionary--region-or-word)))
     (read-string (format "Word (%s): "
                          (or current-word ""))
                  nil nil
@@ -104,26 +110,31 @@
 i.e. `[语][计] dictionary' => 'dictionary'."
   (replace-regexp-in-string "^[[].* " "" explain))
 
+(defun youdao-dictionary--region-or-word ()
+  "Return region or word at point."
+  (if (region-active-p)
+      (buffer-substring-no-properties (region-beginning)
+                                      (region-end))
+    (thing-at-point 'chinese-or-other-word t)))
+
 ;;;###autoload
 (defun youdao-dictionary-search-point ()
-  "Search word at point and display in echo area."
+  "Search word at point or region and display in echo area."
   (interactive)
-  (let ((word (thing-at-point 'chinese-or-other-word)))
+  (let ((word (youdao-dictionary--region-or-word)))
     (if word
         (message (youdao-dictionary--translation
-                  (youdao-dictionary--request-word
-                   (thing-at-point 'chinese-or-other-word))))
+                  (youdao-dictionary--request-word word)))
       (message "No word at point."))))
 
 ;;;###autoload
 (defun youdao-dictionary-search-point+ ()
   "Search word at point and display in popup."
   (interactive)
-  (let ((word (thing-at-point 'chinese-or-other-word)))
+  (let ((word (youdao-dictionary--region-or-word)))
     (if word
         (popup-tip (youdao-dictionary--translation
-                    (youdao-dictionary--request-word
-                     (thing-at-point 'chinese-or-other-word))))
+                    (youdao-dictionary--request-word word)))
       (message "No word at point"))))
 
 ;;;###autoload
@@ -150,16 +161,29 @@ i.e. `[语][计] dictionary' => 'dictionary'."
 (defun youdao-dictionary-search-and-replace ()
   "Search word at point and replace this word with popup menu."
   (interactive)
-  (let* ((bounds (bounds-of-thing-at-point 'chinese-or-other-word))
-         (beginning-of-word (car bounds))
-         (end-of-word (cdr bounds))
-         selected-item)
-    (insert (popup-menu* (mapcar 'youdao-dictionary--strip-explain
-                                 (append (youdao-dictionary--explains
-                                          (youdao-dictionary--request-word
-                                           (thing-at-point 'chinese-or-other-word)))
-                                         nil))))
-    (kill-region beginning-of-word end-of-word)))
+  (if (region-active-p)
+      (let ((region-beginning (region-beginning)) (region-end (region-end))
+            (selected (popup-menu* (mapcar 'youdao-dictionary--strip-explain
+                                           (append (youdao-dictionary--explains
+                                                    (youdao-dictionary--request-word
+                                                     (youdao-dictionary--region-or-word)))
+                                                   nil)))))
+        (when selected
+          (insert selected)
+          (kill-region region-beginning region-end)))
+    (let* ((bounds (bounds-of-thing-at-point 'chinese-or-other-word))
+           (beginning-of-word (car bounds))
+           (end-of-word (cdr bounds)))
+      (when bounds
+        (let ((selected (popup-menu* (mapcar
+                                      'youdao-dictionary--strip-explain
+                                      (append (youdao-dictionary--explains
+                                               (youdao-dictionary--request-word
+                                                (thing-at-point 'chinese-or-other-word)))
+                                              nil)))))
+          (when selected
+            (insert selected)
+            (kill-region beginning-of-word end-of-word)))))))
 
 (provide 'youdao-dictionary)
 
