@@ -57,6 +57,9 @@
 (require 'chinese-word-at-point)
 (require 'popup)
 
+;; Enable Cache (Notes: the cache isn't cleared automatically)
+(setq-local url-automatic-caching t)
+
 (defconst youdao-dictionary-api-url
   "http://fanyi.youdao.com/openapi.do?keyfrom=YouDaoCV&key=659600698&type=data&doctype=json&version=1.1&q=%s"
   "Youdao dictionary API template, URL `http://dict.youdao.com/'.")
