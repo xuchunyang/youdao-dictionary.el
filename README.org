@@ -1,3 +1,5 @@
+[[http://melpa.org/#/youdao-dictionary][file:http://melpa.org/packages/youdao-dictionary-badge.svg]]
+
 * Youdao Dictionary interface for Emacs
 
 =youdao-dictionary= is a simple [[http://dict.youdao.com/][Youdao Dictionary (有道词典)]] interface for Emacs.
@@ -8,14 +10,23 @@
 - [[https://github.com/Bruce-Connor/names][names]]
 - [[https://github.com/xuchunyang/chinese-word-at-point.el][chinese-word-at-point.el]]
 
+*Notes*: [[https://github.com/xuchunyang/chinese-word-at-point.el][chinese-word-at-point.el]] requires an *external* tool to work correctly,
+for more info, see [[https://github.com/xuchunyang/chinese-word-at-point.el#prerequisite][chinese-word-at-point.el#prerequisite]].
+
+** Install
+
+Install =youdao-dictionary= from [[http://melpa.org/][MELPA]] with: =M-x package-install RET youdao-dictionary=
+
 ** Usage
 
-- =youdao-dictionary-search-at-point= :: Search word at point and display result with buffer
-- =youdao-dictionary-search-at-point+= :: Search word at point and display result with popup-tip
-- =youdao-dictionary-search-from-input= :: Search word from input and display result with buffer
+- =youdao-dictionary-search-at-point= :: Search word at point and display result
+     with buffer
+- =youdao-dictionary-search-at-point+= :: Search word at point and display
+     result with popup-tip
+- =youdao-dictionary-search-from-input= :: Search word from input and display
+     result with buffer
 - =youdao-dictionary-search-and-replace= :: Search word at point and display
      result with popup-menu, replace word with selected translation.
-
 
 ** Related tool
 
