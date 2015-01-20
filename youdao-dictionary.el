@@ -37,6 +37,9 @@
   "http://fanyi.youdao.com/openapi.do?keyfrom=YouDaoCV&key=659600698&type=data&doctype=json&version=1.1&q=%s"
   "Youdao dictionary API template, URL `http://dict.youdao.com/'.")
 
+(defconst buffer-name "*Youdao Dictionary*"
+  "*internal* Name of youdao-dictionary buffer.")
+
 (defun -format-request-url (query-word)
   "Format QUERY-WORD as a HTTP request URL."
   (format api-url query-word))
@@ -92,6 +95,51 @@ i.e. `[语][计] dictionary' => 'dictionary'."
       (buffer-substring-no-properties (region-beginning)
                                       (region-end))
     (thing-at-point 'chinese-or-other-word t)))
+
+:autoload
+(defun search-with-buffer ()
+  "Search word at point and display result with buffer."
+  (interactive)
+  (let ((word (-region-or-word)))
+    (if word
+        (with-current-buffer (get-buffer-create buffer-name)
+          (setq buffer-read-only nil)
+          (erase-buffer)
+
+          (let* ((json (-request word))
+                 (query (cdr (assoc 'query json)))
+                 (phonetic (cdr (assoc 'phonetic (cdr (assoc 'basic json)))))
+                 (basic-explains (cdr (assoc 'explains (cdr (assoc 'basic
+                                                                   json)))))
+                 (web-references (cdr (assoc 'web json))))
+            (when (featurep 'org)
+              (org-mode)
+              (setq-local org-startup-folded nil))
+            ;; query and basic->phonetic
+            (insert (format "%s [%s]\n" query phonetic))
+            (insert "\n")
+            ;; basic->explains
+            (insert "* Basic Explains:\n")
+            (mapc (lambda (explain) (insert (format "- %s\n" explain)))
+                  basic-explains)
+            (insert "\n")
+            ;; web references
+            (insert "* Web References\n")
+            (mapc (lambda (key-value)
+                    (let ((key (cdr (assoc 'key key-value)))
+                          (values (cdr (assoc 'value key-value)))
+                          (values-str ""))
+                      (insert (format "- %s :: " key))
+                      (mapc (lambda (value)
+                              (setq values-str (concat values-str ", " value)))
+                            values)
+                      (setq values-str (substring values-str 2))
+                      (insert (format "%s\n" values-str))))
+                  web-references))
+          (goto-char (point-min))
+          (switch-to-buffer-other-window buffer-name)
+          (setq buffer-read-only t))
+      (message "Nothing to look up"))))
 
 :autoload
 (defun search-point ()
