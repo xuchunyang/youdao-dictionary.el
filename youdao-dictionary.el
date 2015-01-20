@@ -59,21 +59,9 @@
       (kill-buffer (current-buffer)))
     json))
 
-(defun -translation (json)
-  "Return translation as a string extracted from JSON (alist)."
-  (elt (cdr (assoc 'translation json)) 0))
-
-(defun -phonetic (json)
-  "Return phonetic as a string extracted from JSON."
-  (cdr (assoc 'phonetic (cdr (assoc 'basic json)))))
-
 (defun -explains (json)
   "Return explains as a vector extracted from JSON."
   (cdr (assoc 'explains (cdr (assoc 'basic json)))))
-
-(defun -web-phrases (json)
-  "Return web phrases as a vector extracted from JSON."
-  (cdr (assoc 'web json)))
 
 (defun -prompt-input ()
   "Prompt input object for translate."
@@ -177,7 +165,7 @@ i.e. `[语][计] dictionary' => 'dictionary'."
   (interactive)
   (if (use-region-p)
       (let ((region-beginning (region-beginning)) (region-end (region-end))
-            (selected (popup-menu* (mapcar '-strip-explain
+            (selected (popup-menu* (mapcar #'-strip-explain
                                            (append (-explains
                                                     (-request
                                                      (-region-or-word)))
@@ -185,12 +173,13 @@ i.e. `[语][计] dictionary' => 'dictionary'."
         (when selected
           (insert selected)
           (kill-region region-beginning region-end)))
+    ;; No active region
     (let* ((bounds (bounds-of-thing-at-point 'chinese-or-other-word))
            (beginning-of-word (car bounds))
            (end-of-word (cdr bounds)))
       (when bounds
         (let ((selected (popup-menu* (mapcar
-                                      '-strip-explain
+                                      #'-strip-explain
                                       (append (-explains
                                                (-request
                                                 (thing-at-point 'chinese-or-other-word)))
