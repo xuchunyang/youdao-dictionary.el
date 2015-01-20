@@ -38,7 +38,7 @@
   "Youdao dictionary API template, URL `http://dict.youdao.com/'.")
 
 (defconst buffer-name "*Youdao Dictionary*"
-  "*internal* Name of youdao-dictionary buffer.")
+  "Buffer name.")
 
 (defun -format-request-url (query-word)
   "Format QUERY-WORD as a HTTP request URL."
@@ -90,14 +90,44 @@ i.e. `[语][计] dictionary' => 'dictionary'."
   (replace-regexp-in-string "^[[].* " "" explain))
 
 (defun -region-or-word ()
-  "Return region or word at point."
+  "Return word in region or word at point."
   (if (use-region-p)
       (buffer-substring-no-properties (region-beginning)
                                       (region-end))
     (thing-at-point 'chinese-or-other-word t)))
 
+(defun -format-result (word)
+  "Format request result of WORD."
+  (let* ((json (-request word))
+         (query (cdr (assoc 'query json)))
+         (phonetic (cdr (assoc 'phonetic (cdr (assoc 'basic json)))))
+         (basic-explains (cdr (assoc 'explains (cdr (assoc 'basic
+                                                           json)))))
+         (basic-explains-str "")
+         (web-references (cdr (assoc 'web json)))
+         (web-references-str ""))
+    (mapc (lambda (explain) (setq basic-explains-str
+                                  (concat basic-explains-str
+                                          (format "- %s\n" explain))))
+          basic-explains)
+    (mapc (lambda (key-value)
+            (let ((key (cdr (assoc 'key key-value)))
+                  (values (cdr (assoc 'value key-value)))
+                  (values-str ""))
+              (setq web-references-str (concat web-references-str
+                                               (format "- %s :: " key)))
+              (mapc (lambda (value)
+                      (setq values-str (concat values-str ", " value)))
+                    values)
+              (setq values-str (substring values-str 2))
+              (setq web-references-str (concat web-references-str
+                                               (format "%s\n" values-str)))))
+          web-references)
+    (format "%s [%s]\n\n* Basic Explains\n%s\n* Web References\n%s\n"
+            query phonetic basic-explains-str web-references-str)))
+
 :autoload
-(defun search-with-buffer ()
+(defun search-at-point ()
   "Search word at point and display result with buffer."
   (interactive)
   (let ((word (-region-or-word)))
@@ -105,90 +135,47 @@ i.e. `[语][计] dictionary' => 'dictionary'."
         (with-current-buffer (get-buffer-create buffer-name)
           (setq buffer-read-only nil)
           (erase-buffer)
-
-          (let* ((json (-request word))
-                 (query (cdr (assoc 'query json)))
-                 (phonetic (cdr (assoc 'phonetic (cdr (assoc 'basic json)))))
-                 (basic-explains (cdr (assoc 'explains (cdr (assoc 'basic
-                                                                   json)))))
-                 (web-references (cdr (assoc 'web json))))
-            (when (featurep 'org)
-              (org-mode)
-              (setq-local org-startup-folded nil))
-            ;; query and basic->phonetic
-            (insert (format "%s [%s]\n" query phonetic))
-            (insert "\n")
-            ;; basic->explains
-            (insert "* Basic Explains:\n")
-            (mapc (lambda (explain) (insert (format "- %s\n" explain)))
-                  basic-explains)
-            (insert "\n")
-            ;; web references
-            (insert "* Web References\n")
-            (mapc (lambda (key-value)
-                    (let ((key (cdr (assoc 'key key-value)))
-                          (values (cdr (assoc 'value key-value)))
-                          (values-str ""))
-                      (insert (format "- %s :: " key))
-                      (mapc (lambda (value)
-                              (setq values-str (concat values-str ", " value)))
-                            values)
-                      (setq values-str (substring values-str 2))
-                      (insert (format "%s\n" values-str))))
-                  web-references))
+          (when (featurep 'org)
+            (setq-local org-startup-folded nil)
+            (org-mode))
+          (insert (-format-result word))
           (goto-char (point-min))
-          (switch-to-buffer-other-window buffer-name)
-          (setq buffer-read-only t))
+          (setq buffer-read-only t)
+          (switch-to-buffer-other-window buffer-name))
       (message "Nothing to look up"))))
 
 :autoload
-(defun search-point ()
-  "Search word at point or region and display in echo area."
+(defun search-at-point+ ()
+  "Search word at point and display result with popup-tip."
   (interactive)
   (let ((word (-region-or-word)))
     (if word
-        (message (-translation
-                  (-request word)))
-      (message "No word at point."))))
+        (popup-tip (-format-result word))
+      (message "Nothing to look up"))))
 
 :autoload
-(defun search-point+ ()
-  "Search word at point and display in popup."
+(defun search-from-input ()
+  "Search word from input and display result with buffer."
   (interactive)
-  (let ((word (-region-or-word)))
+  (let ((word (-prompt-input)))
     (if word
-        (popup-tip (-translation
-                    (-request word)))
-      (message "No word at point"))))
-
-:autoload
-(defun search-input ()
-  "Search input word and display in echo area."
-  (interactive)
-  (let ((word (-prompt-input)))
-    (if (not (string= word ""))
-        (message (-translation
-                  (-request word)))
-      (message "No word inputted."))))
-
-:autoload
-(defun search-input+ ()
-  "Search input word and display in popup."
-  (interactive)
-  (let ((word (-prompt-input)))
-    (if (not (string= word ""))
-        (popup-tip (-translation
-                    (-request word)))
-      (message "No word inputted."))))
-
-;; TODO: show result in new buffer
-
+        (with-current-buffer (get-buffer-create buffer-name)
+          (setq buffer-read-only nil)
+          (erase-buffer)
+          (when (featurep 'org)
+            (setq-local org-startup-folded nil)
+            (org-mode))
+          (insert (-format-result word))
+          (goto-char (point-min))
+          (setq buffer-read-only t)
+          (switch-to-buffer-other-window buffer-name))
+      (message "Nothing to look up"))))
 
 :autoload
 (defun search-and-replace ()
   "Search word at point and replace this word with popup menu."
   (interactive)
-  (if (region-active-p)
+  (if (use-region-p)
       (let ((region-beginning (region-beginning)) (region-end (region-end))
             (selected (popup-menu* (mapcar '-strip-explain
                                            (append (-explains
