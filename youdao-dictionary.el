@@ -112,7 +112,7 @@ i.e. `[语][计] dictionary' => 'dictionary'."
 
 (defun youdao-dictionary--region-or-word ()
   "Return region or word at point."
-  (if (region-active-p)
+  (if (use-region-p)
       (buffer-substring-no-properties (region-beginning)
                                       (region-end))
     (thing-at-point 'chinese-or-other-word t)))
