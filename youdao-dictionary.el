@@ -4,7 +4,7 @@
 
 ;; Author: Chunyang Xu <xuchunyang56@gmail.com>
 ;; URL: https://github.com/xuchunyang/youdao-dictionary.el
-;; Package-Requires: ((popup "0.5.0") (chinese-word-at-point "0.2"))
+;; Package-Requires: ((popup "0.5.0") (chinese-word-at-point "0.2") (names "0.5") (emacs "24"))
 ;; Version: 0.1
 ;; Created: 11 Jan 2015
 ;; Keywords: convenience, Chinese, dictionary
@@ -23,53 +23,29 @@
 ;; along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 ;;; Commentary:
-;;
-;; A simple Interface for Youdao Dictionary (http://dict.youdao.com)
-;;
-;; Below are commands you can use:
-;;
-;; `youdao-dictionary-search-point'
-;; Search word at point and show result in echo area
-;; `youdao-dictionary-search-point+'
-;; Search word at point and show result with popup widget
-;; `youdao-dictionary-search-input'
-;; Search input word and show result in echo area
-;; `youdao-dictionary-search-input+'
-;; Search input word and show result with popup widget
-;; `youdao-dictionary-search-and-replace'
-;; Search word at point and replace this word with popup menu
-;;
-;; Tips:
-;;
-;; If current region is active, region string will be translated, otherwise
-;; translate word around point.
-;;
-
-;;; Installation:
-;;
-;; This package requires `popup' and `chinese-word-at-point'
-;;
 
 ;;; Code:
 (require 'json)
 (require 'url)
-
 (require 'chinese-word-at-point)
 (require 'popup)
 
-(defconst youdao-dictionary-api-url
+;;;###autoload
+(define-namespace youdao-dictionary-
+
+(defconst api-url
   "http://fanyi.youdao.com/openapi.do?keyfrom=YouDaoCV&key=659600698&type=data&doctype=json&version=1.1&q=%s"
   "Youdao dictionary API template, URL `http://dict.youdao.com/'.")
 
-(defun youdao-dictionary--format-request-url (query-word)
+(defun -format-request-url (query-word)
   "Format QUERY-WORD as a HTTP request URL."
-  (format youdao-dictionary-api-url query-word))
+  (format api-url query-word))
 
-(defun youdao-dictionary--request-word (word)
+(defun -request (word)
   "Request WORD, return JSON as an alist if successes."
   (let (json)
     (with-current-buffer (url-retrieve-synchronously
-                          (youdao-dictionary--format-request-url word))
+                          (-format-request-url word))
       (set-buffer-multibyte t)
       (goto-char (point-min))
       (when (not (string-match "200 OK" (buffer-string)))
@@ -80,93 +56,96 @@
       (kill-buffer (current-buffer)))
     json))
 
-(defun youdao-dictionary--translation (json)
+(defun -translation (json)
   "Return translation as a string extracted from JSON (alist)."
   (elt (cdr (assoc 'translation json)) 0))
 
-(defun youdao-dictionary--phonetic (json)
+(defun -phonetic (json)
   "Return phonetic as a string extracted from JSON."
   (cdr (assoc 'phonetic (cdr (assoc 'basic json)))))
 
-(defun youdao-dictionary--explains (json)
+(defun -explains (json)
   "Return explains as a vector extracted from JSON."
   (cdr (assoc 'explains (cdr (assoc 'basic json)))))
 
-(defun youdao-dictionary--web-phrases (json)
+(defun -web-phrases (json)
   "Return web phrases as a vector extracted from JSON."
   (cdr (assoc 'web json)))
 
-(defun youdao-dictionary--prompt-input ()
+(defun -prompt-input ()
   "Prompt input object for translate."
-  (let ((current-word (youdao-dictionary--region-or-word)))
+  (let ((current-word (-region-or-word)))
     (read-string (format "Word (%s): "
                          (or current-word ""))
                  nil nil
                  current-word)))
 
-(defun youdao-dictionary--strip-explain (explain)
+(defun -strip-explain (explain)
   "Remove unneed info in EXPLAIN for replace.
 
 i.e. `[语][计] dictionary' => 'dictionary'."
   (replace-regexp-in-string "^[[].* " "" explain))
 
-(defun youdao-dictionary--region-or-word ()
+(defun -region-or-word ()
   "Return region or word at point."
   (if (use-region-p)
       (buffer-substring-no-properties (region-beginning)
                                       (region-end))
     (thing-at-point 'chinese-or-other-word t)))
 
-;;;###autoload
-(defun youdao-dictionary-search-point ()
+:autoload
+(defun search-point ()
   "Search word at point or region and display in echo area."
   (interactive)
-  (let ((word (youdao-dictionary--region-or-word)))
+  (let ((word (-region-or-word)))
     (if word
-        (message (youdao-dictionary--translation
-                  (youdao-dictionary--request-word word)))
+        (message (-translation
+                  (-request word)))
       (message "No word at point."))))
 
-;;;###autoload
-(defun youdao-dictionary-search-point+ ()
+:autoload
+(defun search-point+ ()
   "Search word at point and display in popup."
   (interactive)
-  (let ((word (youdao-dictionary--region-or-word)))
+  (let ((word (-region-or-word)))
     (if word
-        (popup-tip (youdao-dictionary--translation
-                    (youdao-dictionary--request-word word)))
+        (popup-tip (-translation
+                    (-request word)))
       (message "No word at point"))))
 
-;;;###autoload
-(defun youdao-dictionary-search-input ()
+:autoload
+(defun search-input ()
   "Search input word and display in echo area."
   (interactive)
-  (let ((word (youdao-dictionary--prompt-input)))
+  (let ((word (-prompt-input)))
     (if (not (string= word ""))
-        (message (youdao-dictionary--translation
-                  (youdao-dictionary--request-word word)))
+        (message (-translation
+                  (-request word)))
       (message "No word inputted."))))
 
-;;;###autoload
-(defun youdao-dictionary-search-input+ ()
+:autoload
+(defun search-input+ ()
   "Search input word and display in popup."
   (interactive)
-  (let ((word (youdao-dictionary--prompt-input)))
+  (let ((word (-prompt-input)))
     (if (not (string= word ""))
-        (popup-tip (youdao-dictionary--translation
-                    (youdao-dictionary--request-word word)))
+        (popup-tip (-translation
+                    (-request word)))
       (message "No word inputted."))))
 
-;;;###autoload
-(defun youdao-dictionary-search-and-replace ()
+;; TODO: show result in new buffer
+
+
+:autoload
+(defun search-and-replace ()
   "Search word at point and replace this word with popup menu."
   (interactive)
   (if (region-active-p)
       (let ((region-beginning (region-beginning)) (region-end (region-end))
-            (selected (popup-menu* (mapcar 'youdao-dictionary--strip-explain
-                                           (append (youdao-dictionary--explains
-                                                    (youdao-dictionary--request-word
-                                                     (youdao-dictionary--region-or-word)))
+            (selected (popup-menu* (mapcar '-strip-explain
+                                           (append (-explains
+                                                    (-request
+                                                     (-region-or-word)))
                                                    nil)))))
         (when selected
           (insert selected)
@@ -176,14 +155,17 @@ i.e. `[语][计] dictionary' => 'dictionary'."
            (end-of-word (cdr bounds)))
       (when bounds
         (let ((selected (popup-menu* (mapcar
-                                      'youdao-dictionary--strip-explain
-                                      (append (youdao-dictionary--explains
-                                               (youdao-dictionary--request-word
+                                      '-strip-explain
+                                      (append (-explains
+                                               (-request
                                                 (thing-at-point 'chinese-or-other-word)))
                                               nil)))))
           (when selected
             (insert selected)
             (kill-region beginning-of-word end-of-word)))))))
+
+)
+
 
 (provide 'youdao-dictionary)
 
