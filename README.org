@@ -28,6 +28,19 @@ Install =youdao-dictionary= from [[http://melpa.org/][MELPA]] with: =M-x package
 - =youdao-dictionary-search-and-replace= :: Search word at point and display
      result with popup-menu, replace word with selected translation.
 
+** Sample configuration
+
+#+BEGIN_SRC emacs-lisp
+;; Key bindings
+(global-set-key (kbd "C-c y") 'youdao-dictionary-search-at-point)
+
+;; Integrate with popwin-el (https://github.com/m2ym/popwin-el)
+(push "*Youdao Dictionary*" popwin:special-display-config)
+
+;; Set file path for saving search history
+(setq youdao-dictionary-search-history-file "~/.emacs.d/.youdao")
+#+END_SRC
+
 ** Related tool
 
 - [[https://github.com/felixonmars/ydcv][ydcv]] :: YouDao Console Version
