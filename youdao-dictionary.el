@@ -53,12 +53,19 @@
 (defconst buffer-name "*Youdao Dictionary*"
   "Buffer name.")
 
+(defvar search-history-file (expand-file-name (concat user-emacs-directory
+                                                      ".youdao-search-history"))
+  "File for saving searching history.")
+
 (defun -format-request-url (query-word)
   "Format QUERY-WORD as a HTTP request URL."
   (format api-url query-word))
 
 (defun -request (word)
   "Request WORD, return JSON as an alist if successes."
+  (when (and search-history-file (file-writable-p search-history-file))
+    ;; Save searching history
+    (append-to-file (concat word "\n") nil search-history-file))
   (let (json)
     (with-current-buffer (url-retrieve-synchronously
                           (-format-request-url word))
