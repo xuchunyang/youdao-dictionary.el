@@ -31,6 +31,9 @@ Install =youdao-dictionary= from [[http://melpa.org/][MELPA]] with: =M-x package
 ** Sample configuration
 
 #+BEGIN_SRC emacs-lisp
+;; Enable Cache
+(setq url-automatic-caching t)
+
 ;; Key bindings
 (global-set-key (kbd "C-c y") 'youdao-dictionary-search-at-point)
 
