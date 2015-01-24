@@ -198,12 +198,13 @@ i.e. `[语][计] dictionary' => 'dictionary'."
            (beginning-of-word (car bounds))
            (end-of-word (cdr bounds)))
       (when bounds
-        (let ((selected (popup-menu* (mapcar
-                                      #'-strip-explain
-                                      (append (-explains
-                                               (-request
-                                                (thing-at-point 'chinese-or-other-word)))
-                                              nil)))))
+        (let ((selected
+               (popup-menu* (mapcar
+                             #'-strip-explain
+                             (append (-explains
+                                      (-request
+                                       (thing-at-point 'chinese-or-other-word)))
+                                     nil)))))
           (when selected
             (insert selected)
             (kill-region beginning-of-word end-of-word)))))))
@@ -215,6 +216,7 @@ i.e. `[语][计] dictionary' => 'dictionary'."
 
 ;; Local Variables:
 ;; coding: utf-8
+;; fill-column: 80
 ;; End:
 
 ;;; youdao-dictionary.el ends here
