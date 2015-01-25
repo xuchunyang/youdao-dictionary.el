@@ -134,24 +134,27 @@ i.e. `[语][计] dictionary' => 'dictionary'."
     (format "%s [%s]\n\n* Basic Explains\n%s\n* Web References\n%s\n"
             query phonetic basic-explains-str web-references-str)))
 
-:autoload
-(defun search-at-point ()
-  "Search word at point and display result with buffer."
-  (interactive)
-  (let ((word (-region-or-word)))
-    (if word
-        (with-current-buffer (get-buffer-create buffer-name)
+(defun -search-and-show-in-buffer (word)
+  "Search WORD and show result in `youdao-dictionary-buffer-name' buffer."
+  (if word
+      (with-current-buffer (get-buffer-create buffer-name)
           (setq buffer-read-only nil)
           (erase-buffer)
           (when (featurep 'org)
-            (setq-local org-startup-folded nil)
             (org-mode))
           (insert (-format-result word))
           (goto-char (point-min))
           (setq buffer-read-only t)
           (local-set-key "q" 'bury-buffer)
           (switch-to-buffer-other-window buffer-name))
-      (message "Nothing to look up"))))
+    (message "Nothing to look up")))
+
+:autoload
+(defun search-at-point ()
+  "Search word at point and display result with buffer."
+  (interactive)
+  (let ((word (-region-or-word)))
+    (-search-and-show-in-buffer word)))
 
 :autoload
 (defun search-at-point+ ()
@@ -167,19 +170,7 @@ i.e. `[语][计] dictionary' => 'dictionary'."
   "Search word from input and display result with buffer."
   (interactive)
   (let ((word (-prompt-input)))
-    (if word
-        (with-current-buffer (get-buffer-create buffer-name)
-          (setq buffer-read-only nil)
-          (erase-buffer)
-          (when (featurep 'org)
-            (setq-local org-startup-folded nil)
-            (org-mode))
-          (insert (-format-result word))
-          (goto-char (point-min))
-          (setq buffer-read-only t)
-          (local-set-key "q" 'bury-buffer)
-          (switch-to-buffer-other-window buffer-name))
-      (message "Nothing to look up"))))
+    (-search-and-show-in-buffer word)))
 
 :autoload
 (defun search-and-replace ()
