@@ -57,6 +57,9 @@
                                                       ".youdao-search-history"))
   "File for saving searching history.")
 
+(defvar use-chinese-word-segmentation nil
+  "Set to Non-nil for Chinese word segmentation(中文分词) support")
+
 (defun -format-request-url (query-word)
   "Format QUERY-WORD as a HTTP request URL."
   (format api-url query-word))
@@ -102,7 +105,10 @@ i.e. `[语][计] dictionary' => 'dictionary'."
   (if (use-region-p)
       (buffer-substring-no-properties (region-beginning)
                                       (region-end))
-    (thing-at-point 'chinese-or-other-word t)))
+    (thing-at-point (if use-chinese-word-segmentation
+                        'chinese-or-other-word
+                      'word)
+                    t)))
 
 (defun -format-result (word)
   "Format request result of WORD."
@@ -187,7 +193,9 @@ i.e. `[语][计] dictionary' => 'dictionary'."
           (insert selected)
           (kill-region region-beginning region-end)))
     ;; No active region
-    (let* ((bounds (bounds-of-thing-at-point 'chinese-or-other-word))
+    (let* ((bounds (bounds-of-thing-at-point (if use-chinese-word-segmentation
+                                                 'chinese-or-other-word
+                                               'word)))
            (beginning-of-word (car bounds))
            (end-of-word (cdr bounds)))
       (when bounds
@@ -196,7 +204,10 @@ i.e. `[语][计] dictionary' => 'dictionary'."
                              #'-strip-explain
                              (append (-explains
                                       (-request
-                                       (thing-at-point 'chinese-or-other-word)))
+                                       (thing-at-point
+                                        (if use-chinese-word-segmentation
+                                            'chinese-or-other-word
+                                          'word))))
                                      nil)))))
           (when selected
             (insert selected)
