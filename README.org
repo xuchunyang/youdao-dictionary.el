@@ -1,6 +1,6 @@
-[[http://melpa.org/#/youdao-dictionary][file:http://melpa.org/packages/youdao-dictionary-badge.svg]]
-
 * Youdao Dictionary interface for Emacs
+
+[[http://melpa.org/#/youdao-dictionary][file:http://melpa.org/packages/youdao-dictionary-badge.svg]]
 
 =youdao-dictionary= is a simple [[http://dict.youdao.com/][Youdao Dictionary (有道词典)]] interface for Emacs.
 
@@ -25,14 +25,14 @@ Install =youdao-dictionary= from [[http://melpa.org/][MELPA]] with: =M-x package
 ;; Enable Cache
 (setq url-automatic-caching t)
 
-;; Key bindings
+;; Example Key binding
 (global-set-key (kbd "C-c y") 'youdao-dictionary-search-at-point)
 
 ;; Integrate with popwin-el (https://github.com/m2ym/popwin-el)
 ;; (push "*Youdao Dictionary*" popwin:special-display-config)
 
 ;; Set file path for saving search history
-(setq youdao-dictionary-search-history-file "~/.emacs.d/.youdao")
+;; (setq youdao-dictionary-search-history-file "~/.emacs.d/.youdao")
 
 ;; Enable Chinese word segmentation support (支持中文分词)
 ;; (setq youdao-dictionary-use-chinese-word-segmentation t)

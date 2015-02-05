@@ -53,8 +53,7 @@
 (defconst buffer-name "*Youdao Dictionary*"
   "Buffer name.")
 
-(defvar search-history-file (expand-file-name (concat user-emacs-directory
-                                                      ".youdao-search-history"))
+(defvar search-history-file nil
   "File for saving searching history.")
 
 (defvar use-chinese-word-segmentation nil
