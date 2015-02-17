@@ -150,7 +150,10 @@ i.e. `[语][计] dictionary' => 'dictionary'."
           (insert (-format-result word))
           (goto-char (point-min))
           (setq buffer-read-only t)
-          (local-set-key "q" 'bury-buffer)
+	  ;; Add Buffer Local Keys
+	  ;; (see http://www.emacswiki.org/emacs/BufferLocalKeys)
+	  (use-local-map (copy-keymap org-mode-map))
+	  (local-set-key "q" 'bury-buffer)
           (switch-to-buffer-other-window buffer-name))
     (message "Nothing to look up")))
 
