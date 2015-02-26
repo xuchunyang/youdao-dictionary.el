@@ -43,6 +43,12 @@
 (require 'chinese-word-at-point)
 (require 'popup)
 
+(defgroup youdao-dictionary nil
+  "Youdao dictionary interface for Emacs."
+  :prefix "youdao-dictionary-"
+  :group 'tools
+  :link '(url-link :tag "Github" "https://github.com/xuchunyang/youdao-dictionary.el"))
+
 ;;;###autoload
 (define-namespace youdao-dictionary-
 
@@ -50,14 +56,18 @@
   "http://fanyi.youdao.com/openapi.do?keyfrom=YouDaoCV&key=659600698&type=data&doctype=json&version=1.1&q=%s"
   "Youdao dictionary API template, URL `http://dict.youdao.com/'.")
 
-(defconst buffer-name "*Youdao Dictionary*"
-  "Buffer name.")
+(defcustom buffer-name "*Youdao Dictionary*"
+  "Result Buffer name."
+  :type 'string)
 
-(defvar search-history-file nil
-  "File for saving searching history.")
+(defcustom search-history-file nil
+  "If non-nil, the file be used for saving searching history."
+  :type '(choice (const :tag "Don't save history" nil)
+		 (string :tag "File path")))
 
-(defvar use-chinese-word-segmentation nil
-  "Set to Non-nil for Chinese word segmentation(中文分词) support")
+(defcustom use-chinese-word-segmentation nil
+  "If Non-nil, support Chinese word segmentation(中文分词)"
+  :type 'boolean)
 
 (defun -format-request-url (query-word)
   "Format QUERY-WORD as a HTTP request URL."
