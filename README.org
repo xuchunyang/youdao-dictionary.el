@@ -6,7 +6,9 @@
 
 ** Installation
 
-Install =youdao-dictionary= from [[http://melpa.org/][MELPA]] with: =M-x package-install RET youdao-dictionary=
+Install =youdao-dictionary= from [[http://melpa.org/][MELPA]] with: 
+
+=M-x package-install RET youdao-dictionary RET=
 
 ** Usage
 
