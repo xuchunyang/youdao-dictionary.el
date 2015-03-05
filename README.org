@@ -48,3 +48,5 @@ needed to enable Chinese word segmentation support. For more info, see
 ** Related tool
 
 - [[https://github.com/felixonmars/ydcv][ydcv]] :: YouDao Console Version
+- [[https://github.com/afc163/fanyi][fanyi]] :: A translate tool in your command line (supports both Youdao
+     and iciba)

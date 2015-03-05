@@ -5,7 +5,7 @@
 ;; Author: Chunyang Xu <xuchunyang56@gmail.com>
 ;; URL: https://github.com/xuchunyang/youdao-dictionary.el
 ;; Package-Requires: ((popup "0.5.0") (chinese-word-at-point "0.2") (names "0.5") (emacs "24"))
-;; Version: 0.1
+;; Version: 0.2
 ;; Created: 11 Jan 2015
 ;; Keywords: convenience, Chinese, dictionary
 
@@ -66,7 +66,9 @@
 		 (string :tag "File path")))
 
 (defcustom use-chinese-word-segmentation nil
-  "If Non-nil, support Chinese word segmentation(中文分词)"
+  "If Non-nil, support Chinese word segmentation(中文分词).
+
+See URL `https://github.com/xuchunyang/chinese-word-at-point.el' for more info."
   :type 'boolean)
 
 (defun -format-request-url (query-word)
@@ -232,7 +234,6 @@ i.e. `[语][计] dictionary' => 'dictionary'."
 
 ;; Local Variables:
 ;; coding: utf-8
-;; fill-column: 80
 ;; End:
 
 ;;; youdao-dictionary.el ends here
