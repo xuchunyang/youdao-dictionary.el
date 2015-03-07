@@ -63,7 +63,7 @@
 (defcustom search-history-file nil
   "If non-nil, the file be used for saving searching history."
   :type '(choice (const :tag "Don't save history" nil)
-		 (string :tag "File path")))
+                 (string :tag "File path")))
 
 (defcustom use-chinese-word-segmentation nil
   "If Non-nil, support Chinese word segmentation(中文分词).
@@ -155,18 +155,18 @@ i.e. `[语][计] dictionary' => 'dictionary'."
   "Search WORD and show result in `youdao-dictionary-buffer-name' buffer."
   (if word
       (with-current-buffer (get-buffer-create buffer-name)
-          (setq buffer-read-only nil)
-          (erase-buffer)
-          (when (featurep 'org)
-            (org-mode))
-          (insert (-format-result word))
-          (goto-char (point-min))
-          (setq buffer-read-only t)
-	  ;; Add Buffer Local Keys
-	  ;; (see http://www.emacswiki.org/emacs/BufferLocalKeys)
-	  (use-local-map (copy-keymap org-mode-map))
-	  (local-set-key "q" 'bury-buffer)
-          (switch-to-buffer-other-window buffer-name))
+        (setq buffer-read-only nil)
+        (erase-buffer)
+        (when (featurep 'org)
+          (org-mode))
+        (insert (-format-result word))
+        (goto-char (point-min))
+        (setq buffer-read-only t)
+        ;; Add Buffer Local Keys
+        ;; (see http://www.emacswiki.org/emacs/BufferLocalKeys)
+        (use-local-map (copy-keymap org-mode-map))
+        (local-set-key "q" 'bury-buffer)
+        (switch-to-buffer-other-window buffer-name))
     (message "Nothing to look up")))
 
 :autoload
@@ -234,6 +234,7 @@ i.e. `[语][计] dictionary' => 'dictionary'."
 
 ;; Local Variables:
 ;; coding: utf-8
+;; indent-tabs-mode: nil
 ;; End:
 
 ;;; youdao-dictionary.el ends here
