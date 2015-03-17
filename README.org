@@ -1,6 +1,7 @@
 * Youdao Dictionary interface for Emacs
 
 [[http://melpa.org/#/youdao-dictionary][file:http://melpa.org/packages/youdao-dictionary-badge.svg]]
+[[http://stable.melpa.org/#/youdao-dictionary][file:http://stable.melpa.org/packages/youdao-dictionary-badge.svg]]
 
 =youdao-dictionary= is a simple [[http://dict.youdao.com/][Youdao Dictionary (有道词典)]] interface for Emacs.
 
