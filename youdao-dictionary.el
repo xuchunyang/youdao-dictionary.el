@@ -40,6 +40,7 @@
 ;;; Code:
 (require 'json)
 (require 'url)
+(require 'org)
 (require 'chinese-word-at-point)
 (require 'popup)
 
@@ -157,8 +158,7 @@ i.e. `[语][计] dictionary' => 'dictionary'."
       (with-current-buffer (get-buffer-create buffer-name)
         (setq buffer-read-only nil)
         (erase-buffer)
-        (when (featurep 'org)
-          (org-mode))
+        (org-mode)
         (insert (-format-result word))
         (goto-char (point-min))
         (setq buffer-read-only t)
