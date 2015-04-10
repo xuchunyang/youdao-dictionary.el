@@ -42,6 +42,7 @@
 (require 'url)
 (require 'org)
 (require 'chinese-word-at-point)
+(require 'names)
 (require 'popup)
 
 (defgroup youdao-dictionary nil
