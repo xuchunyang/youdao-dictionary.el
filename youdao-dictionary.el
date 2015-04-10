@@ -42,8 +42,10 @@
 (require 'url)
 (require 'org)
 (require 'chinese-word-at-point)
-(require 'names)
 (require 'popup)
+
+(eval-when-compile
+  (require 'names))
 
 (defgroup youdao-dictionary nil
   "Youdao dictionary interface for Emacs."
