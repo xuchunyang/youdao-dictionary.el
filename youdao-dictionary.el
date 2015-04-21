@@ -125,39 +125,30 @@ i.e. `[语][计] dictionary' => 'dictionary'."
 (defun -format-result (word)
   "Format request result of WORD."
   (let* ((json (-request word))
-         (translations (cdr (assoc 'translation json)))
-         (translations-str "")
-         (query (cdr (assoc 'query json)))
-         (phonetic (cdr (assoc 'phonetic (cdr (assoc 'basic json)))))
-         (basic-explains (cdr (assoc 'explains (cdr (assoc 'basic json)))))
-         (basic-explains-str "")
-         (web-references (cdr (assoc 'web json)))
-         (web-references-str ""))
-    (mapc (lambda (key-value)
-            (let ((key (cdr (assoc 'key key-value)))
-                  (values (cdr (assoc 'value key-value)))
-                  (values-str ""))
-              (setq web-references-str (concat web-references-str
-                                               (format "- %s :: " key)))
-              (mapc (lambda (value)
-                      (setq values-str (concat values-str ", " value)))
-                    values)
-              (setq values-str (substring values-str 2))
-              (setq web-references-str (concat web-references-str (format "%s\n" values-str)))))
-          web-references)
-    (if basic-explains
-        (progn
-          (mapc (lambda (explain)
-                  (setq basic-explains-str
-                        (concat basic-explains-str (format "- %s\n" explain))))
-                basic-explains)
-          (format "%s [%s]\n\n* Basic Explains\n%s\n* Web References\n%s\n"
-                  query phonetic basic-explains-str web-references-str))
-      (setq translations-str
-            (mapconcat (lambda (translate) (concat "- " translate))
-                       translations
-                       "\n"))
-      (format "%s\n\n* Translation\n%s\n" query translations-str))))
+         (query        (assoc-default 'query       json)) ; string
+         (translation  (assoc-default 'translation json)) ; array
+         (errorCode    (assoc-default 'errorCode   json)) ; number
+         (web          (assoc-default 'web         json)) ; array
+         (basic        (assoc-default 'basic       json)) ; alist
+         ;; construct data for display
+         (phonetic (assoc-default 'phonetic basic))
+         (translation-str (mapconcat
+                           (lambda (trans) (concat "- " trans))
+                           translation "\n"))
+         (basic-explains-str (mapconcat
+                              (lambda (explain) (concat "- " explain))
+                              (assoc-default 'explains basic) "\n"))
+         (web-str (mapconcat
+                   (lambda (k-v)
+                     (format "- %s :: %s"
+                             (assoc-default 'key k-v)
+                             (mapconcat 'identity (assoc-default 'value k-v) "; ")))
+                   web "\n")))
+    (if basic
+        (format "%s [%s]\n\n* Basic Explains\n%s\n\n* Web References\n%s\n"
+                query phonetic basic-explains-str web-str)
+      (format "%s\n\n* Translation\n%s\n"
+              query translation-str))))
 
 (defun -search-and-show-in-buffer (word)
   "Search WORD and show result in `youdao-dictionary-buffer-name' buffer."
