@@ -5,7 +5,7 @@
 ;; Author: Chunyang Xu <xuchunyang56@gmail.com>
 ;; URL: https://github.com/xuchunyang/youdao-dictionary.el
 ;; Package-Requires: ((popup "0.5.0") (chinese-word-at-point "0.2") (names "0.5") (emacs "24"))
-;; Version: 0.2
+;; Version: 0.2.2
 ;; Created: 11 Jan 2015
 ;; Keywords: convenience, Chinese, dictionary
 
@@ -74,7 +74,7 @@ See URL `https://github.com/xuchunyang/chinese-word-at-point.el' for more info."
 
 (defun -format-request-url (query-word)
   "Format QUERY-WORD as a HTTP request URL."
-  (format api-url query-word))
+  (format api-url (url-hexify-string query-word)))
 
 (defun -request (word)
   "Request WORD, return JSON as an alist if successes."
@@ -125,17 +125,14 @@ i.e. `[语][计] dictionary' => 'dictionary'."
 (defun -format-result (word)
   "Format request result of WORD."
   (let* ((json (-request word))
+         (translations (cdr (assoc 'translation json)))
+         (translations-str "")
          (query (cdr (assoc 'query json)))
          (phonetic (cdr (assoc 'phonetic (cdr (assoc 'basic json)))))
-         (basic-explains (cdr (assoc 'explains (cdr (assoc 'basic
-                                                           json)))))
+         (basic-explains (cdr (assoc 'explains (cdr (assoc 'basic json)))))
          (basic-explains-str "")
          (web-references (cdr (assoc 'web json)))
          (web-references-str ""))
-    (mapc (lambda (explain) (setq basic-explains-str
-                                  (concat basic-explains-str
-                                          (format "- %s\n" explain))))
-          basic-explains)
     (mapc (lambda (key-value)
             (let ((key (cdr (assoc 'key key-value)))
                   (values (cdr (assoc 'value key-value)))
@@ -146,11 +143,21 @@ i.e. `[语][计] dictionary' => 'dictionary'."
                       (setq values-str (concat values-str ", " value)))
                     values)
               (setq values-str (substring values-str 2))
-              (setq web-references-str (concat web-references-str
-                                               (format "%s\n" values-str)))))
+              (setq web-references-str (concat web-references-str (format "%s\n" values-str)))))
           web-references)
-    (format "%s [%s]\n\n* Basic Explains\n%s\n* Web References\n%s\n"
-            query phonetic basic-explains-str web-references-str)))
+    (if basic-explains
+        (progn
+          (mapc (lambda (explain)
+                  (setq basic-explains-str
+                        (concat basic-explains-str (format "- %s\n" explain))))
+                basic-explains)
+          (format "%s [%s]\n\n* Basic Explains\n%s\n* Web References\n%s\n"
+                  query phonetic basic-explains-str web-references-str))
+      (setq translations-str
+            (mapconcat (lambda (translate) (concat "- " translate))
+                       translations
+                       "\n"))
+      (format "%s\n\n* Translation\n%s\n" query translations-str))))
 
 (defun -search-and-show-in-buffer (word)
   "Search WORD and show result in `youdao-dictionary-buffer-name' buffer."
