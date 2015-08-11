@@ -225,6 +225,20 @@ i.e. `[语][计] dictionary' => 'dictionary'."
             (insert selected)
             (kill-region beginning-of-word end-of-word)))))))
 
+(defvar history nil)
+
+:autoload
+(defun search (query)
+  "Show the explanation of QUERY from Youdao dictionary."
+  (interactive
+   (let* ((string (or (if (use-region-p)
+                          (buffer-substring
+                           (region-beginning) (region-end))
+                        (thing-at-point 'word))
+                      (read-string "Search Youdao Dictionary: " nil 'history))))
+     (list string)))
+  (-search-and-show-in-buffer query))
+
 )
 
 
