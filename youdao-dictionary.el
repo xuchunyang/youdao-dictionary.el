@@ -235,7 +235,7 @@ i.e. `[语][计] dictionary' => 'dictionary'."
                           (buffer-substring
                            (region-beginning) (region-end))
                         (thing-at-point 'word))
-                      (read-string "Search Youdao Dictionary: " nil 'history))))
+                      (read-string "Search Youdao Dictionary: " nil 'youdao-dictionary-history))))
      (list string)))
   (-search-and-show-in-buffer query))
 
