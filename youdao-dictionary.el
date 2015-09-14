@@ -80,7 +80,7 @@ See URL `https://github.com/xuchunyang/chinese-word-at-point.el' for more info."
 (defun -format-voice-url (query-word)
   "Format QUERY-WORD as voice url."
   (format voice-url (url-hexify-string query-word)))
-  
+
 (defun -format-request-url (query-word)
   "Format QUERY-WORD as a HTTP request URL."
   (format api-url (url-hexify-string query-word)))
@@ -174,12 +174,12 @@ i.e. `[语][计] dictionary' => 'dictionary'."
         (use-local-map (copy-keymap org-mode-map))
         (local-set-key "q" 'quit-window)
         (set (make-local-variable 'current-buffer-word) word)
-	(local-set-key "p" (lambda()
-			     (interactive)
-			     (if (local-variable-if-set-p 'current-buffer-word)
-				 (-play-voice current-buffer-word))))
-	(local-set-key "y" 'youdao-dictionary-play-voice-at-point)
-						    
+        (local-set-key "p" (lambda()
+                             (interactive)
+                             (if (local-variable-if-set-p 'current-buffer-word)
+                                 (-play-voice current-buffer-word))))
+        (local-set-key "y" 'youdao-dictionary-play-voice-at-point)
+
         (switch-to-buffer-other-window buffer-name))
     (message "Nothing to look up")))
 
@@ -260,16 +260,16 @@ i.e. `[语][计] dictionary' => 'dictionary'."
   "Play voice of the WORD if there has mplayer program."
   (if (executable-find "mplayer")
       (start-process-shell-command "youdao-play-voice" nil
-				   (concat "mplayer " (shell-quote-argument (-format-voice-url word))))
-     (message "mplayer is need to play word voice.")))
+                                   (concat "mplayer " (shell-quote-argument (-format-voice-url word))))
+    (message "mplayer is need to play word voice.")))
 
 :autoload
 (defun play-voice-at-point ()
   "Play voice of the the word at point."
   (interactive)
-   (let ((word (-region-or-word)))
-     (-play-voice word)))
-  
+  (let ((word (-region-or-word)))
+    (-play-voice word)))
+
 :autoload
 (defun play-voice-from-input ()
   "Play voice of user input word."
