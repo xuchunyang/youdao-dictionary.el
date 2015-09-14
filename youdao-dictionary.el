@@ -265,7 +265,7 @@ i.e. `[语][计] dictionary' => 'dictionary'."
 
 :autoload
 (defun play-voice-at-point ()
-  "Play voice of the the word at point."
+  "Play voice of the word at point."
   (interactive)
   (let ((word (-region-or-word)))
     (-play-voice word)))
