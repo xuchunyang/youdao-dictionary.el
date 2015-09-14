@@ -257,11 +257,12 @@ i.e. `[语][计] dictionary' => 'dictionary'."
 
 
 (defun -play-voice (word)
-  "Play voice of the WORD if there has mplayer program."
-  (if (executable-find "mplayer")
-      (start-process-shell-command "youdao-play-voice" nil
-                                   (concat "mplayer " (shell-quote-argument (-format-voice-url word))))
-    (message "mplayer is need to play word voice.")))
+  "Play voice of the WORD if there has mplayer or mpg123 program."
+  (let ((player (or (executable-find "mplayer")
+                    (executable-find "mpg123"))))
+    (if player
+        (start-process player nil player (-format-voice-url word))
+      (user-error "mplayer or mpg123 is needed to play word voice"))))
 
 :autoload
 (defun play-voice-at-point ()
