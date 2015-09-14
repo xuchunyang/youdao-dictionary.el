@@ -5,7 +5,7 @@
 ;; Author: Chunyang Xu <xuchunyang56@gmail.com>
 ;; URL: https://github.com/xuchunyang/youdao-dictionary.el
 ;; Package-Requires: ((popup "0.5.0") (chinese-word-at-point "0.2") (names "0.5") (emacs "24"))
-;; Version: 0.2.2
+;; Version: 0.3
 ;; Created: 11 Jan 2015
 ;; Keywords: convenience, Chinese, dictionary
 
@@ -36,6 +36,10 @@
 ;; `youdao-dictionary-search-and-replace'
 ;; Search word at point and display result with popup-menu, replace word with
 ;; selected translation.
+;; `youdao-dictionary-play-voice-at-point'
+;; Play voice of word at point (by [[https://github.com/snyh][@snyh]])
+;; `youdao-dictionary-play-voice-from-input'
+;; Play voice of word from input (by [[https://github.com/snyh][@snyh]])
 
 ;;; Code:
 (require 'json)
