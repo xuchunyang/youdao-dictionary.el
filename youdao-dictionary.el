@@ -163,27 +163,32 @@ i.e. `[语][计] dictionary' => 'dictionary'."
       (format "%s\n\n* Translation\n%s\n"
               query translation-str))))
 
+(defun play-voice-of-current-word ()
+  "Play voice of current word shown in *Youdao Dictionary*."
+  (interactive)
+  (if (local-variable-if-set-p 'youdao-dictionary-current-buffer-word)
+      (-play-voice current-buffer-word)))
+
+(defvar current-buffer-word nil)
+
+(define-derived-mode mode org-mode "Youdao-dictionary"
+  "Major mode for viewing Youdao dictionary result.
+\\{youdao-dictionary-mode-map}"
+  (read-only-mode 1)
+  (define-key mode-map "q" 'quit-window)
+  (define-key mode-map "p" 'youdao-dictionary-play-voice-of-current-word)
+  (define-key mode-map "y" 'youdao-dictionary-play-voice-at-point))
+
 (defun -search-and-show-in-buffer (word)
   "Search WORD and show result in `youdao-dictionary-buffer-name' buffer."
   (if word
       (with-current-buffer (get-buffer-create buffer-name)
-        (setq buffer-read-only nil)
-        (erase-buffer)
-        (org-mode)
-        (insert (-format-result word))
-        (goto-char (point-min))
-        (setq buffer-read-only t)
-        ;; Add Buffer Local Keys
-        ;; (see http://www.emacswiki.org/emacs/BufferLocalKeys)
-        (use-local-map (copy-keymap org-mode-map))
-        (local-set-key "q" 'quit-window)
-        (set (make-local-variable 'current-buffer-word) word)
-        (local-set-key "p" (lambda()
-                             (interactive)
-                             (if (local-variable-if-set-p 'current-buffer-word)
-                                 (-play-voice current-buffer-word))))
-        (local-set-key "y" 'youdao-dictionary-play-voice-at-point)
-
+        (let ((inhibit-read-only t))
+          (erase-buffer)
+          (mode)
+          (insert (-format-result word))
+          (goto-char (point-min))
+          (set (make-local-variable 'youdao-dictionary-current-buffer-word) word))
         (switch-to-buffer-other-window buffer-name))
     (message "Nothing to look up")))
 
