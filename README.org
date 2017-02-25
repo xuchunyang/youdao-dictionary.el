@@ -48,7 +48,7 @@ needed to enable Chinese word segmentation support. For more info, see
 [[https://github.com/xuchunyang/chinese-word-at-point.el#prerequisite][chinese-word-at-point.el#prerequisite]].
 
 
-** Related tool
+** Related tools
 
 - [[https://github.com/felixonmars/ydcv][ydcv]] :: YouDao Console Version
 - [[https://github.com/afc163/fanyi][fanyi]] :: A translate tool in your command line (supports both Youdao

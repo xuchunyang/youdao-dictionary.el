@@ -1,11 +1,11 @@
 ;;; youdao-dictionary.el --- Youdao Dictionary interface for Emacs
 
-;; Copyright © 2015 Chunyang Xu
+;; Copyright © 2015-2017 Chunyang Xu
 
 ;; Author: Chunyang Xu <xuchunyang56@gmail.com>
 ;; URL: https://github.com/xuchunyang/youdao-dictionary.el
 ;; Package-Requires: ((popup "0.5.0") (chinese-word-at-point "0.2") (names "0.5") (emacs "24"))
-;; Version: 0.3
+;; Version: 0.4
 ;; Created: 11 Jan 2015
 ;; Keywords: convenience, Chinese, dictionary
 
