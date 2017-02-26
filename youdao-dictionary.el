@@ -52,6 +52,9 @@
 (require 'pos-tip)
 (eval-when-compile (require 'names))
 
+(eval-when-compile
+  (require 'names))
+
 (defgroup youdao-dictionary nil
   "Youdao dictionary interface for Emacs."
   :prefix "youdao-dictionary-"
