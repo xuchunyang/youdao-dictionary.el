@@ -4,7 +4,7 @@
 
 ;; Author: Chunyang Xu <xuchunyang56@gmail.com>
 ;; URL: https://github.com/xuchunyang/youdao-dictionary.el
-;; Package-Requires: ((popup "0.5.0") (chinese-word-at-point "0.2") (names "0.5") (emacs "24"))
+;; Package-Requires: ((popup "0.5.0") (pos-tip "0.4.6") (chinese-word-at-point "0.2") (names "0.5") (emacs "24"))
 ;; Version: 0.4
 ;; Created: 11 Jan 2015
 ;; Keywords: convenience, Chinese, dictionary
@@ -40,6 +40,8 @@
 ;; Play voice of word at point (by [[https://github.com/snyh][@snyh]])
 ;; `youdao-dictionary-play-voice-from-input'
 ;; Play voice of word from input (by [[https://github.com/snyh][@snyh]])
+;; `youdao-dictionary-search-at-point-tooltip'
+;; Search word at point and display result with pos-tip
 
 ;;; Code:
 (require 'json)
@@ -47,6 +49,7 @@
 (require 'org)
 (require 'chinese-word-at-point)
 (require 'popup)
+(require 'pos-tip)
 (eval-when-compile (require 'names))
 
 (defgroup youdao-dictionary nil
@@ -163,6 +166,13 @@ i.e. `[语][计] dictionary' => 'dictionary'."
       (format "%s\n\n* Translation\n%s\n"
               query translation-str))))
 
+(defun -pos-tip (string)
+  "Show STRING using pos-tip-show."
+  (pos-tip-show string nil nil nil 0)
+  (unwind-protect
+      (push (read-event) unread-command-events)
+    (pos-tip-hide)))
+
 (defun play-voice-of-current-word ()
   "Play voice of current word shown in *Youdao Dictionary*."
   (interactive)
@@ -206,6 +216,15 @@ i.e. `[语][计] dictionary' => 'dictionary'."
   (let ((word (-region-or-word)))
     (if word
         (popup-tip (-format-result word))
+      (message "Nothing to look up"))))
+
+:autoload
+(defun search-at-point-tooltip ()
+  "Search word at point and display result with pos-tip."
+  (interactive)
+  (let ((word (-region-or-word)))
+    (if word
+        (-pos-tip (-format-result word))
       (message "Nothing to look up"))))
 
 :autoload
