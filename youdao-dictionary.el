@@ -61,9 +61,31 @@
 ;;;###autoload
 (define-namespace youdao-dictionary-
 
+(defconst secret-key "atY68WyfGGoVE5WBc09ihdc2lxZP9sUR"
+  "Youdao dictionary Secret Key. You can get it from ai.youdao.com.")
+
+(defconst app-key "72c03449033eb239"
+  "Youdao dictionary App Key. You can get it from ai.youdao.com.")
+
+(defconst salt (number-to-string (random 10))
+  "Youdao dictionary random number.")
+
+(defun get-sign (word)
+  (upcase (md5 (concat app-key word salt secret-key))))
+
+(defconst from "auto"
+  "Default from is 'auto'.")
+
+(defconst to "auto"
+  "Dafault to is 'auto'.")
+
 (defconst api-url
-  "http://fanyi.youdao.com/openapi.do?keyfrom=YouDaoCV&key=659600698&type=data&doctype=json&version=1.1&q=%s"
+  "http://openapi.youdao.com/api?q=%s&from=%s&to=%s&appKey=%s&salt=%s&sign=%s"
   "Youdao dictionary API template, URL `http://dict.youdao.com/'.")
+
+;; (defconst api-url
+;;   "http://fanyi.youdao.com/openapi.do?keyfrom=YouDaoCV&key=659600698&type=data&doctype=json&version=1.1&q=%s"
+;;   "Youdao dictionary API template, URL `http://dict.youdao.com/'.")
 
 (defconst voice-url
   "http://dict.youdao.com/dictvoice?type=2&audio=%s"
@@ -90,7 +112,7 @@ See URL `https://github.com/xuchunyang/chinese-word-at-point.el' for more info."
 
 (defun -format-request-url (query-word)
   "Format QUERY-WORD as a HTTP request URL."
-  (format api-url (url-hexify-string query-word)))
+  (format api-url query-word from to app-key salt (get-sign query-word)))
 
 (defun -request (word)
   "Request WORD, return JSON as an alist if successes."
