@@ -199,7 +199,8 @@ i.e. `[语][计] dictionary' => 'dictionary'."
           (insert (-format-result word))
           (goto-char (point-min))
           (set (make-local-variable 'youdao-dictionary-current-buffer-word) word))
-        (switch-to-buffer-other-window buffer-name))
+        (unless (get-buffer-window (current-buffer))
+          (switch-to-buffer-other-window buffer-name)))
     (message "Nothing to look up")))
 
 :autoload
