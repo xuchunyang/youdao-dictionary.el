@@ -287,7 +287,8 @@ i.e. `[语][计] dictionary' => 'dictionary'."
 
 (defun -play-voice (word)
   "Play voice of the WORD if there has mplayer or mpg123 program."
-  (let ((player (or (executable-find "mplayer")
+  (let ((player (or (executable-find "mpv")
+                    (executable-find "mplayer")
                     (executable-find "mpg123"))))
     (if player
         (start-process player nil player (-format-voice-url word))
