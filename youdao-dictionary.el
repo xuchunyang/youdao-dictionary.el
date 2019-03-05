@@ -130,14 +130,16 @@ i.e. `[语][计] dictionary' => 'dictionary'."
 
 (defun -region-or-word ()
   "Return word in region or word at point."
-  (if (use-region-p)
-      (buffer-substring-no-properties (region-beginning)
-                                      (region-end))
-    (thing-at-point (if use-chinese-word-segmentation
-                        'chinese-or-other-word
-                      'word)
-                    t)))
-
+  (if (derived-mode-p 'pdf-view-mode)
+      (mapconcat 'identity (pdf-view-active-region-text) "\n")
+    (if (use-region-p)
+        (buffer-substring-no-properties (region-beginning)
+                                        (region-end))
+      (thing-at-point (if use-chinese-word-segmentation
+                          'chinese-or-other-word
+                        'word)
+                      t))))
+  
 (defun -format-result (word)
   "Format request result of WORD."
   (let* ((json (-request word))
