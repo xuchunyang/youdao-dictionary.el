@@ -50,6 +50,7 @@
 (require 'chinese-word-at-point)
 (require 'popup)
 (require 'pos-tip)
+(require 'posframe)
 (eval-when-compile (require 'names))
 
 (defgroup youdao-dictionary nil
@@ -95,6 +96,10 @@
   "Result Buffer name."
   :type 'string)
 
+(defcustom posframe-buffer-name "*Youdao Dictionary Posframe*"
+  "Result posframe buffer name."
+  :type 'string)
+
 (defcustom search-history-file nil
   "If non-nil, the file be used for saving searching history."
   :type '(choice (const :tag "Don't save history" nil)
@@ -102,9 +107,11 @@
 
 (defcustom use-chinese-word-segmentation nil
   "If Non-nil, support Chinese word segmentation(中文分词).
-
 See URL `https://github.com/xuchunyang/chinese-word-at-point.el' for more info."
   :type 'boolean)
+
+(defvar posframe-show-p nil
+  "If non-nil, means current posframe buffer is showing.")
 
 (defun -format-voice-url (query-word)
   "Format QUERY-WORD as voice url."
@@ -225,6 +232,19 @@ i.e. `[语][计] dictionary' => 'dictionary'."
           (switch-to-buffer-other-window buffer-name)))
     (message "Nothing to look up")))
 
+(defun -search-and-show-in-posframe (word)
+  "Search WORD and show result in `youdao-dictionary-posframe' buffer."
+  (if word
+      (progn
+        (with-current-buffer (get-buffer-create posframe-buffer-name)
+          (erase-buffer)
+          (insert (-format-result word)))
+        (when (posframe-workable-p)
+          (posframe-show posframe-buffer-name
+                         :position (point)))
+        (setq posframe-show-p t))
+    (message "Nothing to look up")))
+
 :autoload
 (defun search-at-point ()
   "Search word at point and display result with buffer."
@@ -240,6 +260,29 @@ i.e. `[语][计] dictionary' => 'dictionary'."
     (if word
         (popup-tip (-format-result word))
       (message "Nothing to look up"))))
+
+:autoload
+(defun search-at-point++ ()
+  "Search word at point and display result with posframe."
+  (interactive)
+  (let ((word (-region-or-word)))
+    (message word)
+    (if (and word (posframe-workable-p))
+        (-search-and-show-in-posframe word)
+      (message "posframe not work or nothing to look up!"))))
+
+(defun toggle-posframe ()
+  "Toggle `youdao-dictionary-posframe-buffer-name' buffer state."
+  (interactive)
+  (if posframe-show-p
+      (hide-posframe)
+    (search-at-point++)))
+
+(defun hide-posframe ()
+  "Hide search result posframe buffer `posframe-buffer-name'."
+  (progn
+    (posframe-hide posframe-buffer-name)
+    (setq posframe-show-p nil)))
 
 :autoload
 (defun search-at-point-tooltip ()

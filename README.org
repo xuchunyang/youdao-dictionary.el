@@ -41,6 +41,9 @@ Install =youdao-dictionary= from [[http://melpa.org/][MELPA]] with:
 
 ;; Enable Chinese word segmentation support (支持中文分词)
 ;; (setq youdao-dictionary-use-chinese-word-segmentation t)
+
+;; Use posframe show search result
+;; (global-set-key (kbd "C-c y") 'youdao-dictionary-toggle-posframe)
 #+END_SRC
 
 *Notes*: A external Chinese word segmentation tool (e.g. [[https://github.com/fxsjy/jieba][结巴分词]]) is
