@@ -4,6 +4,7 @@
 
 ;; Author: Chunyang Xu <xuchunyang56@gmail.com>
 ;; URL: https://github.com/xuchunyang/youdao-dictionary.el
+;; Package-Version: 20180714.414
 ;; Package-Requires: ((popup "0.5.0") (pos-tip "0.4.6") (chinese-word-at-point "0.2") (names "0.5") (emacs "24"))
 ;; Version: 0.4
 ;; Created: 11 Jan 2015
@@ -49,6 +50,7 @@
 (require 'org)
 (require 'chinese-word-at-point)
 (require 'popup)
+(require 'posframe)
 (require 'pos-tip)
 (eval-when-compile (require 'names))
 
@@ -60,6 +62,11 @@
 
 ;;;###autoload
 (define-namespace youdao-dictionary-
+
+(defface posframe-tip-face
+  '((t (:background "gray12" :foreground "green")))
+  "Face for posframe tip."
+  :group 'youdao-dictionary)
 
 (defconst api-url
   "http://fanyi.youdao.com/openapi.do?keyfrom=YouDaoCV&key=659600698&type=data&doctype=json&version=1.1&q=%s"
@@ -77,6 +84,12 @@
   "If non-nil, the file be used for saving searching history."
   :type '(choice (const :tag "Don't save history" nil)
                  (string :tag "File path")))
+
+(defcustom tooltip-last-point 0
+  "Hold last point when show tooltip, use for hide tooltip after move point.")
+
+(defvar tooltip-last-scroll-offset 0
+  "Hold last scroll offset when show tooltip, use for hide tooltip after window scroll.")
 
 (defcustom use-chinese-word-segmentation nil
   "If Non-nil, support Chinese word segmentation(中文分词).
@@ -173,6 +186,31 @@ i.e. `[语][计] dictionary' => 'dictionary'."
       (push (read-event) unread-command-events)
     (pos-tip-hide)))
 
+(defun hide-tooltip-after-move ()
+  (ignore-errors
+    (when (get-buffer buffer-name)
+      (unless (and
+               (equal (point) tooltip-last-point)
+               (equal (window-start) tooltip-last-scroll-offset))
+        (posframe-delete buffer-name)
+        (kill-buffer buffer-name)))))
+
+(defun -posframe-tip (string)
+  "Show STRING using posframe-show."
+  (posframe-show
+   buffer-name
+   :string string
+   :position (point)
+   :timeout 5
+   :background-color (face-attribute 'youdao-dictionary-posframe-tip-face :background)
+   :foreground-color (face-attribute 'youdao-dictionary-posframe-tip-face :foreground)
+   :internal-border-width 10
+   )
+  (add-hook 'post-command-hook 'youdao-dictionary-hide-tooltip-after-move)
+  (setq tooltip-last-point (point))
+  (setq tooltip-last-scroll-offset (window-start))
+  )
+
 (defun play-voice-of-current-word ()
   "Play voice of current word shown in *Youdao Dictionary*."
   (interactive)
@@ -226,6 +264,15 @@ i.e. `[语][计] dictionary' => 'dictionary'."
   (let ((word (-region-or-word)))
     (if word
         (-pos-tip (-format-result word))
+      (message "Nothing to look up"))))
+
+:autoload
+(defun search-at-point-posframe()
+  "Search word at point and display result with posframe."
+  (interactive)
+  (let ((word (-region-or-word)))
+    (if word
+        (-posframe-tip (-format-result word))
       (message "Nothing to look up"))))
 
 :autoload
