@@ -49,6 +49,7 @@
 (require 'org)
 (require 'chinese-word-at-point)
 (require 'popup)
+(require 'posframe)
 (require 'pos-tip)
 (eval-when-compile (require 'names))
 
@@ -69,6 +70,17 @@
   "http://dict.youdao.com/dictvoice?type=2&audio=%s"
   "Youdao dictionary API for query the voice of word.")
 
+(defcustom -tooltip-name "*youdao*"
+  "The name of youdao tooltip name."
+  :type 'string
+  :group 'youdao-dictionary)
+
+(defvar -tooltip-last-point 0
+  "Hold last point when show tooltip, use for hide tooltip after move point.")
+
+(defvar -tooltip-last-scroll-offset 0
+  "Hold last scroll offset when show tooltip, use for hide tooltip after window scroll.")
+
 (defcustom buffer-name "*Youdao Dictionary*"
   "Result Buffer name."
   :type 'string)
@@ -83,6 +95,27 @@
 
 See URL `https://github.com/xuchunyang/chinese-word-at-point.el' for more info."
   :type 'boolean)
+
+(defun -hide-tooltip-after-move ()
+  (ignore-errors
+    (when (get-buffer youdao-dictionary--tooltip-name)
+      (unless (and
+               (equal (point) youdao-dictionary--tooltip-last-point)
+               (equal (window-start) youdao-dictionary--tooltip-last-scroll-offset))
+        (posframe-delete youdao-dictionary--tooltip-name)
+        (kill-buffer youdao-dictionary--tooltip-name)))))
+
+(defun -show-posframe-tooltip (result)
+  "Show string on posframe buffer."
+  ;; Show tooltip at point if word fetch from user cursor.
+  (posframe-show youdao-dictionary--tooltip-name
+                 :string result
+                 :position (point)
+                 :timeout 5
+                 :internal-border-width 10)
+  (add-hook 'post-command-hook 'youdao-dictionary--hide-tooltip-after-move)
+  (setq youdao-dictionary--tooltip-last-point (point))
+  (setq youdao-dictionary--tooltip-last-scroll-offset (window-start)))
 
 (defun -format-voice-url (query-word)
   "Format QUERY-WORD as voice url."
@@ -217,6 +250,15 @@ i.e. `[语][计] dictionary' => 'dictionary'."
   (let ((word (-region-or-word)))
     (if word
         (popup-tip (-format-result word))
+      (message "Nothing to look up"))))
+
+:autoload
+(defun search-at-point++ ()
+  "Search word at point and display result with posframe."
+  (interactive)
+  (let ((word (-region-or-word)))
+    (if word
+        (youdao-dictionary--show-posframe-tooltip (-format-result word))
       (message "Nothing to look up"))))
 
 :autoload
