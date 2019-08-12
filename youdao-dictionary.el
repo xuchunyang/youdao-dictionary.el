@@ -63,12 +63,19 @@
 (define-namespace youdao-dictionary-
 
 (defconst api-url
-  "http://fanyi.youdao.com/openapi.do?keyfrom=YouDaoCV&key=659600698&type=data&doctype=json&version=1.1&q=%s"
+  ;; "http://fanyi.youdao.com/openapi.do?keyfrom=YouDaoCV&key=659600698&type=data&doctype=json&version=1.1&q=%s"
+  "http://openapi.youdao.com/api?q=%s&from=auto&to=auto&appKey=%s&salt=%s&sign=%s"
   "Youdao dictionary API template, URL `http://dict.youdao.com/'.")
 
 (defconst voice-url
   "http://dict.youdao.com/dictvoice?type=2&audio=%s"
   "Youdao dictionary API for query the voice of word.")
+
+(defcustom api-app-secret nil
+  "Youdao dictionary Secret Key. You can get it from ai.youdao.com.")
+
+(defcustom api-app-key nil
+  "Youdao dictionary App Key. You can get it from ai.youdao.com.")
 
 (defcustom -tooltip-name "*youdao*"
   "The name of youdao tooltip name."
@@ -95,6 +102,13 @@
 
 See URL `https://github.com/xuchunyang/chinese-word-at-point.el' for more info."
   :type 'boolean)
+
+
+(defun -get-salt()
+  (number-to-string (random 10)))
+
+(defun -get-sign(query-word salt)
+    (md5 (concat api-app-key query-word salt api-app-secret)))
 
 (defun -hide-tooltip-after-move ()
   (ignore-errors
@@ -123,7 +137,9 @@ See URL `https://github.com/xuchunyang/chinese-word-at-point.el' for more info."
 
 (defun -format-request-url (query-word)
   "Format QUERY-WORD as a HTTP request URL."
-  (format api-url (url-hexify-string query-word)))
+  (let* ((q (url-hexify-string query-word))
+         (salt (-get-salt)))
+      (format api-url q api-app-key salt (-get-sign q salt))))
 
 (defun -request (word)
   "Request WORD, return JSON as an alist if successes."
