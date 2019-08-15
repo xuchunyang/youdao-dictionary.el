@@ -64,7 +64,7 @@
 
 (defconst api-url
   ;; "http://fanyi.youdao.com/openapi.do?keyfrom=YouDaoCV&key=659600698&type=data&doctype=json&version=1.1&q=%s"
-  "http://openapi.youdao.com/api?q=%s&from=auto&to=auto&appKey=%s&salt=%s&sign=%s"
+  "http://openapi.youdao.com/api?q=%s&from=%s&to=%s&appKey=%s&salt=%s&sign=%s"
   "Youdao dictionary API template, URL `http://dict.youdao.com/'.")
 
 (defconst voice-url
@@ -125,7 +125,7 @@ See URL `https://github.com/xuchunyang/chinese-word-at-point.el' for more info."
   (posframe-show youdao-dictionary--tooltip-name
                  :string result
                  :position (point)
-                 :timeout 5
+                 :timeout 6
                  :internal-border-width 10)
   (add-hook 'post-command-hook 'youdao-dictionary--hide-tooltip-after-move)
   (setq youdao-dictionary--tooltip-last-point (point))
@@ -137,9 +137,9 @@ See URL `https://github.com/xuchunyang/chinese-word-at-point.el' for more info."
 
 (defun -format-request-url (query-word)
   "Format QUERY-WORD as a HTTP request URL."
-  (let* ((q (url-hexify-string query-word))
+  (let* ((q query-word)
          (salt (-get-salt)))
-      (format api-url q api-app-key salt (-get-sign q salt))))
+    (format api-url q "auto" "auto" api-app-key salt (-get-sign q salt))))
 
 (defun -request (word)
   "Request WORD, return JSON as an alist if successes."
