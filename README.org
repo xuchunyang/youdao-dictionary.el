@@ -15,14 +15,22 @@ Install =youdao-dictionary= from [[http://melpa.org/][MELPA]] with:
 
 - =youdao-dictionary-search-at-point= :: Search word at point and display result
      with buffer
+- =youdao-dictionary-search-at-point-= :: Search word at point and display result
+     with given function, default to be =youdao-dictionary-tip-function=
 - =youdao-dictionary-search-at-point+= :: Search word at point and display
      result with popup-tip
+- =youdao-dictionary-search-at-point-posframe= :: Search word at point and display
+     result with posframe
 - =youdao-dictionary-search-from-input= :: Search word from input and display
      result with buffer
 - =youdao-dictionary-search-and-replace= :: Search word at point and display
      result with popup-menu, replace word with selected translation.
 - =youdao-dictionary-play-voice-at-point= :: Play voice of word at point (by [[https://github.com/snyh][@snyh]])
 - =youdao-dictionary-play-voice-from-input= :: Play voice of word from input (by [[https://github.com/snyh][@snyh]])
+
+** Customization
+   - =youdao-dictionary-tip-function= :: Which function to use to show results, default to be =youdao-dictionary--posframe-tip=, which uses =posframe=. Other possible choices are =youdao-dictionary--pos-tip= for using =pos-tip=, and =popup-tip= for using =popup-tip=
+   - =youdao-dictionary-posframe-tip-face= :: Face for posframe buffer, defaut to inherit =tooltip=
 
 ** Sample configuration
 
