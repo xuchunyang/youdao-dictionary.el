@@ -63,11 +63,6 @@
 ;;;###autoload
 (define-namespace youdao-dictionary-
 
-(defface posframe-tip-face
-  '((t (:background "#333333" :foreground "#dcdccc")))
-  "Face for posframe tip."
-  :group 'youdao-dictionary)
-
 (defconst api-url
   "http://fanyi.youdao.com/openapi.do?keyfrom=YouDaoCV&key=659600698&type=data&doctype=json&version=1.1&q=%s"
   "Youdao dictionary API template, URL `http://dict.youdao.com/'.")
@@ -202,8 +197,6 @@ i.e. `[语][计] dictionary' => 'dictionary'."
    :string string
    :position (point)
    :timeout 5
-   ;; :background-color "#333333"
-   ;; :foreground-color "#dcdccc"
    :override-parameters  '((alpha . (90 . 90)))
    :internal-border-width 10
    )
