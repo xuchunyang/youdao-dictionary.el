@@ -64,7 +64,7 @@
 (define-namespace youdao-dictionary-
 
 (defface posframe-tip-face
-  '((t (:background "gray12" :foreground "green")))
+  '((t (:background "#333333" :foreground "#dcdccc")))
   "Face for posframe tip."
   :group 'youdao-dictionary)
 
@@ -202,8 +202,9 @@ i.e. `[语][计] dictionary' => 'dictionary'."
    :string string
    :position (point)
    :timeout 5
-   :background-color (face-attribute 'youdao-dictionary-posframe-tip-face :background)
-   :foreground-color (face-attribute 'youdao-dictionary-posframe-tip-face :foreground)
+   ;; :background-color "#333333"
+   ;; :foreground-color "#dcdccc"
+   :override-parameters  '((alpha . (90 . 90)))
    :internal-border-width 10
    )
   (add-hook 'post-command-hook 'youdao-dictionary-hide-tooltip-after-move)
