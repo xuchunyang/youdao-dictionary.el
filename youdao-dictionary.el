@@ -50,8 +50,7 @@
 (require 'chinese-word-at-point)
 (require 'popup)
 (require 'pos-tip)
-(unless (version< emacs-version "26.1")
-  (require 'posframe))
+(require 'posframe nil t)
 (eval-when-compile (require 'names))
 
 (defgroup youdao-dictionary nil
