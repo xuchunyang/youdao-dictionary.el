@@ -49,8 +49,9 @@
 (require 'org)
 (require 'chinese-word-at-point)
 (require 'popup)
-(require 'posframe)
 (require 'pos-tip)
+(unless (version< emacs-version "26.1")
+  (require 'posframe))
 (eval-when-compile (require 'names))
 
 (defgroup youdao-dictionary nil
@@ -85,13 +86,17 @@
 See URL `https://github.com/xuchunyang/chinese-word-at-point.el' for more info."
   :type 'boolean)
 
-(defcustom tip-function #'-posframe-tip
-  "Tooltip to use for displaying, default to youdao-dictionary-posframe-tip.
+(defcustom tip-function
+  (if (version< emacs-version "26.1")
+      #'-pos-tip
+    #'-posframe-tip)
+  "Tooltip to use for displaying.
 
- Other possible choices are:
- yaoudao-dictionary--posframe-tip for posframe,
- youdao-dictionary--pos-tip for pos-tip,
- and popup-tip for popup-tip."
+Default to youdao-dictionary--posframe-tip, or youdao-dictionary--postip if
+posframe is not available. Other possible choices are:
+yaoudao-dictionary--posframe-tip for posframe,
+youdao-dictionary--pos-tip for pos-tip, and
+popup-tip for popup-tip."
   :type 'function
   :group 'youdao-dictionary)
 
@@ -239,9 +244,12 @@ i.e. `[语][计] dictionary' => 'dictionary'."
 
 :autoload
 (defun search-at-point- (&optional func)
-  "Search word at point and display result with given func."
+  "Search word at point and display result with given FUNC.
+
+When FUNC is nil, uses youdao-dictionary-tip-function."
   (interactive)
   (let ((word (-region-or-word)))
+    (setq func (or func tip-function))
     (if word
         (funcall func (-format-result word))
       (message "Nothing to look up"))))
