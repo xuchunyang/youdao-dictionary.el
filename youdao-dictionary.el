@@ -85,20 +85,6 @@
 See URL `https://github.com/xuchunyang/chinese-word-at-point.el' for more info."
   :type 'boolean)
 
-(defcustom tip-function
-  (if (version< emacs-version "26.1")
-      #'-pos-tip
-    #'-posframe-tip)
-  "Tooltip to use for displaying.
-
-Default to youdao-dictionary--posframe-tip, or youdao-dictionary--postip if
-posframe is not available. Other possible choices are:
-yaoudao-dictionary--posframe-tip for posframe,
-youdao-dictionary--pos-tip for pos-tip, and
-popup-tip for popup-tip."
-  :type 'function
-  :group 'youdao-dictionary)
-
 (defface posframe-tip-face
   '((t (:inherit tooltip)))
   "Face for posframe tip."
@@ -195,14 +181,17 @@ i.e. `[语][计] dictionary' => 'dictionary'."
 
 (defun -posframe-tip (string)
   "Show STRING using posframe-show."
-  (posframe-show buffer-name
-                 :string (youdao-dictionary--format-result word)
-                 :position (point)
-                 :background-color (face-attribute 'youdao-dictionary-posframe-tip-face :background nil t)
-                 :foreground-color (face-attribute 'youdao-dictionary-posframe-tip-face :foreground nil t))
-  (unwind-protect
-      (push (read-event) unread-command-events)
-    (posframe-delete buffer-name)))
+  (if (posframe-workable-p)
+      (progn
+        (posframe-show buffer-name
+                       :string string
+                       :position (point)
+                       :background-color (face-attribute 'youdao-dictionary-posframe-tip-face :background nil t)
+                       :foreground-color (face-attribute 'youdao-dictionary-posframe-tip-face :foreground nil t))
+        (unwind-protect
+            (push (read-event) unread-command-events)
+          (posframe-delete buffer-name)))
+    (error "Posframe not workable")))
 
 (defun play-voice-of-current-word ()
   "Play voice of current word shown in *Youdao Dictionary*."
@@ -241,14 +230,9 @@ i.e. `[语][计] dictionary' => 'dictionary'."
   (let ((word (-region-or-word)))
     (-search-and-show-in-buffer word)))
 
-:autoload
-(defun search-at-point- (&optional func)
-  "Search word at point and display result with given FUNC.
-
-When FUNC is nil, uses youdao-dictionary-tip-function."
-  (interactive)
+(defun search-at-point- (func)
+  "Search word at point and display result with given FUNC."
   (let ((word (-region-or-word)))
-    (setq func (or func tip-function))
     (if word
         (funcall func (-format-result word))
       (message "Nothing to look up"))))
