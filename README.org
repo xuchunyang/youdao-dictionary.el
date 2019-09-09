@@ -12,17 +12,23 @@ Install =youdao-dictionary= from [[http://melpa.org/][MELPA]] with:
 =M-x package-install RET youdao-dictionary RET=
 
 ** Usage
-
 - =youdao-dictionary-search-at-point= :: Search word at point and display result
      with buffer
 - =youdao-dictionary-search-at-point+= :: Search word at point and display
      result with popup-tip
+- =youdao-dictionary-search-at-point-tooltip= :: Search word at point and display
+     result with tooltip
+- =youdao-dictionary-search-at-point-posframe= :: Search word at point and display
+     result with posframe
 - =youdao-dictionary-search-from-input= :: Search word from input and display
      result with buffer
 - =youdao-dictionary-search-and-replace= :: Search word at point and display
      result with popup-menu, replace word with selected translation.
 - =youdao-dictionary-play-voice-at-point= :: Play voice of word at point (by [[https://github.com/snyh][@snyh]])
 - =youdao-dictionary-play-voice-from-input= :: Play voice of word from input (by [[https://github.com/snyh][@snyh]])
+
+** Customization
+- =youdao-dictionary-posframe-tip-face= :: Face for posframe buffer, defaut to inherit =tooltip=
 
 ** Sample configuration
 
@@ -31,7 +37,7 @@ Install =youdao-dictionary= from [[http://melpa.org/][MELPA]] with:
 (setq url-automatic-caching t)
 
 ;; Example Key binding
-(global-set-key (kbd "C-c y") 'youdao-dictionary-search-at-point)
+(global-set-key (kbd "C-c y") 'youdao-dictionary-search-at-point-)
 
 ;; Integrate with popwin-el (https://github.com/m2ym/popwin-el)
 ;; (push "*Youdao Dictionary*" popwin:special-display-config)

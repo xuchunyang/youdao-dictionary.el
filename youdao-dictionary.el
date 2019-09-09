@@ -50,6 +50,7 @@
 (require 'chinese-word-at-point)
 (require 'popup)
 (require 'pos-tip)
+(require 'posframe nil t)
 (eval-when-compile (require 'names))
 
 (defgroup youdao-dictionary nil
@@ -83,6 +84,11 @@
 
 See URL `https://github.com/xuchunyang/chinese-word-at-point.el' for more info."
   :type 'boolean)
+
+(defface posframe-tip-face
+  '((t (:inherit tooltip)))
+  "Face for posframe tip."
+  :group 'youdao-dictionary)
 
 (defun -format-voice-url (query-word)
   "Format QUERY-WORD as voice url."
@@ -173,6 +179,20 @@ i.e. `[语][计] dictionary' => 'dictionary'."
       (push (read-event) unread-command-events)
     (pos-tip-hide)))
 
+(defun -posframe-tip (string)
+  "Show STRING using posframe-show."
+  (if (posframe-workable-p)
+      (progn
+        (posframe-show buffer-name
+                       :string string
+                       :position (point)
+                       :background-color (face-attribute 'youdao-dictionary-posframe-tip-face :background nil t)
+                       :foreground-color (face-attribute 'youdao-dictionary-posframe-tip-face :foreground nil t))
+        (unwind-protect
+            (push (read-event) unread-command-events)
+          (posframe-delete buffer-name)))
+    (error "Posframe not workable")))
+
 (defun play-voice-of-current-word ()
   "Play voice of current word shown in *Youdao Dictionary*."
   (interactive)
@@ -210,23 +230,30 @@ i.e. `[语][计] dictionary' => 'dictionary'."
   (let ((word (-region-or-word)))
     (-search-and-show-in-buffer word)))
 
+(defun search-at-point- (func)
+  "Search word at point and display result with given FUNC."
+  (let ((word (-region-or-word)))
+    (if word
+        (funcall func (-format-result word))
+      (message "Nothing to look up"))))
+
 :autoload
 (defun search-at-point+ ()
   "Search word at point and display result with popup-tip."
   (interactive)
-  (let ((word (-region-or-word)))
-    (if word
-        (popup-tip (-format-result word))
-      (message "Nothing to look up"))))
+  (search-at-point- #'popup-tip))
+
+:autoload
+(defun search-at-point-posframe ()
+  "Search word at point and display result with posframe."
+  (interactive)
+  (search-at-point- #'-posframe-tip))
 
 :autoload
 (defun search-at-point-tooltip ()
   "Search word at point and display result with pos-tip."
   (interactive)
-  (let ((word (-region-or-word)))
-    (if word
-        (-pos-tip (-format-result word))
-      (message "Nothing to look up"))))
+  (search-at-point- #'-pos-tip))
 
 :autoload
 (defun search-from-input ()
