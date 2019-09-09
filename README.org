@@ -12,13 +12,12 @@ Install =youdao-dictionary= from [[http://melpa.org/][MELPA]] with:
 =M-x package-install RET youdao-dictionary RET=
 
 ** Usage
-- =youdao-dictionary-search-at-point-= :: Search word at point and display result
-     with given function, default to be =youdao-dictionary-tip-function=. This
-  is the recommended function to use
 - =youdao-dictionary-search-at-point= :: Search word at point and display result
      with buffer
 - =youdao-dictionary-search-at-point+= :: Search word at point and display
      result with popup-tip
+- =youdao-dictionary-search-at-point-tooltip= :: Search word at point and display
+     result with tooltip
 - =youdao-dictionary-search-at-point-posframe= :: Search word at point and display
      result with posframe
 - =youdao-dictionary-search-from-input= :: Search word from input and display
@@ -29,11 +28,6 @@ Install =youdao-dictionary= from [[http://melpa.org/][MELPA]] with:
 - =youdao-dictionary-play-voice-from-input= :: Play voice of word from input (by [[https://github.com/snyh][@snyh]])
 
 ** Customization
-- =youdao-dictionary-tip-function= :: Which function to use to show results.
-  Possible choices are:
-  | ~youdao-dictionary--posframe-tip~ | uses =posframe=, default when =posframe= is available    |
-  | ~youdao-dictionary--pos-tip~      | uses =pos-tip=, default when =posframe= is not available |
-  | ~popup-tip~                       | uses =popup-tip=                                         |
 - =youdao-dictionary-posframe-tip-face= :: Face for posframe buffer, defaut to inherit =tooltip=
 
 ** Sample configuration
