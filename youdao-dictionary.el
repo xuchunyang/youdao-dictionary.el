@@ -186,6 +186,7 @@ i.e. `[语][计] dictionary' => 'dictionary'."
         (posframe-show buffer-name
                        :string string
                        :position (point)
+                       :override-parameters  '((alpha . (90 . 90)))
                        :background-color (face-attribute 'youdao-dictionary-posframe-tip-face :background nil t)
                        :foreground-color (face-attribute 'youdao-dictionary-posframe-tip-face :foreground nil t))
         (unwind-protect
