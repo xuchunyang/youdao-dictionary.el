@@ -71,11 +71,13 @@
   "Youdao dictionary API for query the voice of word.")
 
 (defconst secret-key
-  "atY68WyfGGoVE5WBc09ihdc2lxZP9sUR"
+  (or (getenv "YOUDAO_SECRET_KEY")
+      "atY68WyfGGoVE5WBc09ihdc2lxZP9sUR")
   "Youdao dictionary Secret Key. You can get it from ai.youdao.com.")
 
 (defconst app-key
-  "72c03449033eb239"
+  (or (getenv "YOUDAO_APP_KEY")
+      "72c03449033eb239")
   "Youdao dictionary App Key. You can get it from ai.youdao.com.")
 
 (defconst sign-type "v3"
