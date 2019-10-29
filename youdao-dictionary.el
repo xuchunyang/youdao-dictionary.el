@@ -63,12 +63,31 @@
 (define-namespace youdao-dictionary-
 
 (defconst api-url
-  "http://fanyi.youdao.com/openapi.do?keyfrom=YouDaoCV&key=659600698&type=data&doctype=json&version=1.1&q=%s"
+  "https://openapi.youdao.com/api"
   "Youdao dictionary API template, URL `http://dict.youdao.com/'.")
 
 (defconst voice-url
   "http://dict.youdao.com/dictvoice?type=2&audio=%s"
   "Youdao dictionary API for query the voice of word.")
+
+(defconst secret-key
+  "atY68WyfGGoVE5WBc09ihdc2lxZP9sUR"
+  "Youdao dictionary Secret Key. You can get it from ai.youdao.com.")
+
+(defconst app-key
+  "72c03449033eb239"
+  "Youdao dictionary App Key. You can get it from ai.youdao.com.")
+
+(defconst sign-type "v3"
+  "Youdao dictionary sign type")
+
+(defcustom from "auto"
+  "Source language. see http://ai.youdao.com/DOCSIRMA/html/%E8%87%AA%E7%84%B6%E8%AF%AD%E8%A8%80%E7%BF%BB%E8%AF%91/API%E6%96%87%E6%A1%A3/%E6%96%87%E6%9C%AC%E7%BF%BB%E8%AF%91%E6%9C%8D%E5%8A%A1/%E6%96%87%E6%9C%AC%E7%BF%BB%E8%AF%91%E6%9C%8D%E5%8A%A1-API%E6%96%87%E6%A1%A3.html"
+  :type 'string)
+
+(defcustom to "auto"
+  "dest language. see http://ai.youdao.com/DOCSIRMA/html/%E8%87%AA%E7%84%B6%E8%AF%AD%E8%A8%80%E7%BF%BB%E8%AF%91/API%E6%96%87%E6%A1%A3/%E6%96%87%E6%9C%AC%E7%BF%BB%E8%AF%91%E6%9C%8D%E5%8A%A1/%E6%96%87%E6%9C%AC%E7%BF%BB%E8%AF%91%E6%9C%8D%E5%8A%A1-API%E6%96%87%E6%A1%A3.html"
+  :type 'string)
 
 (defcustom buffer-name "*Youdao Dictionary*"
   "Result Buffer name."
@@ -90,22 +109,54 @@ See URL `https://github.com/xuchunyang/chinese-word-at-point.el' for more info."
   "Face for posframe tip."
   :group 'youdao-dictionary)
 
+(defun get-salt ()
+  (number-to-string (random 1000)))
+
+(defun get-curtime ()
+  (format-time-string "%s"))
+
+(defun get-input (word)
+  (let ((len (length word)))
+    (if (> len 20)
+        (concat (substring word 0 10)
+                (number-to-string len)
+                (substring word -10))
+      word)))
+
+(defun get-sign (salt curtime word)
+  (let* ((input (get-input word))
+         (signstr (concat app-key input salt curtime secret-key)))
+    (secure-hash 'sha256 signstr)))
+
 (defun -format-voice-url (query-word)
   "Format QUERY-WORD as voice url."
   (format voice-url (url-hexify-string query-word)))
 
 (defun -format-request-url (query-word)
   "Format QUERY-WORD as a HTTP request URL."
-  (format api-url (url-hexify-string query-word)))
+  (let* ((salt (get-salt))
+         (curtime (get-curtime))
+         (sign (get-sign salt curtime word))
+         (url-request-data (string-join (list (concat "q=" (url-hexify-string query-word))
+                                              (concat "from=" from)
+                                              (concat "to=" to)
+                                              (concat "appKey=" app-key)
+                                              (concat "salt=" salt)
+                                              (concat "sign=" sign)
+                                              (concat "signType=" sign-type)
+                                              (concat "curtime=" curtime))
+                                        "&" )))
+    (concat  api-url "?" url-request-data)))
 
 (defun -request (word)
   "Request WORD, return JSON as an alist if successes."
   (when (and search-history-file (file-writable-p search-history-file))
     ;; Save searching history
     (append-to-file (concat word "\n") nil search-history-file))
-  (let (json)
-    (with-current-buffer (url-retrieve-synchronously
-                          (-format-request-url word))
+  (let* (;; (url-request-method "POST")
+         json)
+    (with-current-buffer (url-retrieve-synchronously (-format-request-url word))
+      (message "%s" url-request-data)
       (set-buffer-multibyte t)
       (goto-char (point-min))
       (when (not (string-match "200 OK" (buffer-string)))
