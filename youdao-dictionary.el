@@ -156,7 +156,6 @@ See URL `https://github.com/xuchunyang/chinese-word-at-point.el' for more info."
           '(("Content-Type" . "application/x-www-form-urlencoded")))
          json)
     (with-current-buffer (url-retrieve-synchronously api-url)
-      (message "%s" url-request-data)
       (set-buffer-multibyte t)
       (goto-char (point-min))
       (when (not (string-match "200 OK" (buffer-string)))
