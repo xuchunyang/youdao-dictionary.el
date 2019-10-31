@@ -63,6 +63,10 @@
 (define-namespace youdao-dictionary-
 
 (defconst api-url
+  "http://fanyi.youdao.com/openapi.do?keyfrom=YouDaoCV&key=659600698&type=data&doctype=json&version=1.1&q=%s"
+  "Youdao dictionary API template, URL `http://dict.youdao.com/'.")
+
+(defconst api-url-v3
   "https://openapi.youdao.com/api"
   "Youdao dictionary API template, URL `http://dict.youdao.com/'.")
 
@@ -70,15 +74,15 @@
   "http://dict.youdao.com/dictvoice?type=2&audio=%s"
   "Youdao dictionary API for query the voice of word.")
 
-(defconst secret-key
-  (or (getenv "YOUDAO_SECRET_KEY")
-      "atY68WyfGGoVE5WBc09ihdc2lxZP9sUR")
-  "Youdao dictionary Secret Key. You can get it from ai.youdao.com.")
+;; (setq youdao-dictionary-secret-key "atY68WyfGGoVE5WBc09ihdc2lxZP9sUR")
+(defcustom secret-key (getenv "YOUDAO_SECRET_KEY")
+  "Youdao dictionary Secret Key. You can get it from ai.youdao.com."
+  :type 'string)
 
-(defconst app-key
-  (or (getenv "YOUDAO_APP_KEY")
-      "72c03449033eb239")
-  "Youdao dictionary App Key. You can get it from ai.youdao.com.")
+;; (setq youdao-dictionary-app-key "72c03449033eb239")
+(defcustom app-key (getenv "YOUDAO_APP_KEY")
+  "Youdao dictionary App Key. You can get it from ai.youdao.com."
+  :type 'string)
 
 (defconst sign-type "v3"
   "Youdao dictionary sign type")
@@ -134,6 +138,15 @@ See URL `https://github.com/xuchunyang/chinese-word-at-point.el' for more info."
   "Format QUERY-WORD as voice url."
   (format voice-url (url-hexify-string query-word)))
 
+(defun -request-v3-p ()
+  (and app-key secret-key))
+
+(defun -format-request-url (query-word)
+  "Format QUERY-WORD as a HTTP request URL."
+  (if (-request-v3-p)
+      api-url-v3
+    (format api-url (url-hexify-string query-word))))
+
 (defun -request (word)
   "Request WORD, return JSON as an alist if successes."
   (when (and search-history-file (file-writable-p search-history-file))
@@ -142,20 +155,22 @@ See URL `https://github.com/xuchunyang/chinese-word-at-point.el' for more info."
   (let* ((salt (get-salt))
          (curtime (get-curtime))
          (sign (get-sign salt curtime word))
-         (url-request-data (string-join (list (concat "q=" (url-hexify-string word))
-                                              (concat "from=" from)
-                                              (concat "to=" to)
-                                              (concat "appKey=" app-key)
-                                              (concat "salt=" salt)
-                                              (concat "sign=" (url-hexify-string sign))
-                                              (concat "signType=" sign-type)
-                                              (concat "curtime=" curtime))
-                                        "&" ))
-         (url-request-method "POST")
-         (url-request-extra-headers
-          '(("Content-Type" . "application/x-www-form-urlencoded")))
+         (url-request-data (when (-request-v3-p)
+                             (mapconcat #'identity (list (concat "q=" (url-hexify-string word))
+                                                (concat "from=" from)
+                                                (concat "to=" to)
+                                                (concat "appKey=" app-key)
+                                                (concat "salt=" salt)
+                                                (concat "sign=" (url-hexify-string sign))
+                                                (concat "signType=" sign-type)
+                                                (concat "curtime=" curtime))
+                                          "&" )))
+         (url-request-method (when (-request-v3-p)
+                               "POST"))
+         (url-request-extra-headers (when (-request-v3-p)
+                                      '(("Content-Type" . "application/x-www-form-urlencoded"))))
          json)
-    (with-current-buffer (url-retrieve-synchronously api-url)
+    (with-current-buffer (url-retrieve-synchronously (-format-request-url word))
       (set-buffer-multibyte t)
       (goto-char (point-min))
       (when (not (string-match "200 OK" (buffer-string)))
