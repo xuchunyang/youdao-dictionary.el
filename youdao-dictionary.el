@@ -74,12 +74,10 @@
   "http://dict.youdao.com/dictvoice?type=2&audio=%s"
   "Youdao dictionary API for query the voice of word.")
 
-;; (setq youdao-dictionary-secret-key "atY68WyfGGoVE5WBc09ihdc2lxZP9sUR")
 (defcustom secret-key (getenv "YOUDAO_SECRET_KEY")
   "Youdao dictionary Secret Key. You can get it from ai.youdao.com."
   :type 'string)
 
-;; (setq youdao-dictionary-app-key "72c03449033eb239")
 (defcustom app-key (getenv "YOUDAO_APP_KEY")
   "Youdao dictionary App Key. You can get it from ai.youdao.com."
   :type 'string)
