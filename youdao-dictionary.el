@@ -53,6 +53,8 @@
 (require 'posframe nil t)
 (eval-when-compile (require 'names))
 
+(declare-function pdf-view-active-region-text "pdf-view" ())
+
 (defgroup youdao-dictionary nil
   "Youdao dictionary interface for Emacs."
   :prefix "youdao-dictionary-"
