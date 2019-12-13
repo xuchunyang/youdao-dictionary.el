@@ -50,7 +50,6 @@
 (require 'chinese-word-at-point)
 (require 'popup)
 (require 'pos-tip)
-(require 'posframe nil t)
 (eval-when-compile (require 'names))
 
 (declare-function pdf-view-active-region-text "pdf-view" ())
@@ -210,7 +209,7 @@ i.e. `[语][计] dictionary' => 'dictionary'."
                           'chinese-or-other-word
                         'word)
                       t))))
-  
+
 (defun -format-result (word)
   "Format request result of WORD."
   (let* ((json (-request word))
@@ -246,36 +245,42 @@ i.e. `[语][计] dictionary' => 'dictionary'."
       (push (read-event) unread-command-events)
     (pos-tip-hide)))
 
+(defvar current-buffer-word nil)
+
 (defun -posframe-tip (string)
   "Show STRING using posframe-show."
-  (if (posframe-workable-p)
-      (progn
-        (posframe-show buffer-name
-                       :string string
-                       :position (point)
-                       :override-parameters  '((alpha . (90 . 90)))
-                       :background-color (face-attribute 'youdao-dictionary-posframe-tip-face :background nil t)
-                       :foreground-color (face-attribute 'youdao-dictionary-posframe-tip-face :foreground nil t))
-        (unwind-protect
-            (push (read-event) unread-command-events)
-          (posframe-delete buffer-name)))
-    (error "Posframe not workable")))
+  (unless (and (require 'posframe nil t) (posframe-workable-p))
+    (error "Posframe not workable"))
+
+  (let ((word (-region-or-word)))
+    (if word
+        (progn
+          (with-current-buffer (get-buffer-create buffer-name)
+            (let ((inhibit-read-only t))
+              (erase-buffer)
+              (mode)
+              (insert (-format-result word))
+              (goto-char (point-min))
+              (set (make-local-variable 'current-buffer-word) word)))
+          (posframe-show buffer-name :internal-border-width 10)
+          (unwind-protect
+              (push (read-event) unread-command-events)
+            (posframe-delete buffer-name)))
+      (message "Nothing to look up"))))
 
 (defun play-voice-of-current-word ()
   "Play voice of current word shown in *Youdao Dictionary*."
   (interactive)
-  (if (local-variable-if-set-p 'youdao-dictionary-current-buffer-word)
+  (if (local-variable-if-set-p 'current-buffer-word)
       (-play-voice current-buffer-word)))
-
-(defvar current-buffer-word nil)
 
 (define-derived-mode mode org-mode "Youdao-dictionary"
   "Major mode for viewing Youdao dictionary result.
 \\{youdao-dictionary-mode-map}"
   (read-only-mode 1)
   (define-key mode-map "q" 'quit-window)
-  (define-key mode-map "p" 'youdao-dictionary-play-voice-of-current-word)
-  (define-key mode-map "y" 'youdao-dictionary-play-voice-at-point))
+  (define-key mode-map "p" 'play-voice-of-current-word)
+  (define-key mode-map "y" 'play-voice-at-point))
 
 (defun -search-and-show-in-buffer (word)
   "Search WORD and show result in `youdao-dictionary-buffer-name' buffer."
@@ -286,7 +291,7 @@ i.e. `[语][计] dictionary' => 'dictionary'."
           (mode)
           (insert (-format-result word))
           (goto-char (point-min))
-          (set (make-local-variable 'youdao-dictionary-current-buffer-word) word))
+          (set (make-local-variable 'current-buffer-word) word))
         (unless (get-buffer-window (current-buffer))
           (switch-to-buffer-other-window buffer-name)))
     (message "Nothing to look up")))
@@ -375,7 +380,7 @@ i.e. `[语][计] dictionary' => 'dictionary'."
                           (buffer-substring
                            (region-beginning) (region-end))
                         (thing-at-point 'word))
-                      (read-string "Search Youdao Dictionary: " nil 'youdao-dictionary-history))))
+                      (read-string "Search Youdao Dictionary: " nil 'history))))
      (list string)))
   (-search-and-show-in-buffer query))
 
