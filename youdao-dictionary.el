@@ -262,7 +262,11 @@ i.e. `[语][计] dictionary' => 'dictionary'."
               (insert (-format-result word))
               (goto-char (point-min))
               (set (make-local-variable 'current-buffer-word) word)))
-          (posframe-show buffer-name :internal-border-width 10)
+          (posframe-show buffer-name
+                         :left-fringe 8
+                         :right-fringe 8
+                         :internal-border-color (face-foreground 'default)
+                         :internal-border-width 1)
           (unwind-protect
               (push (read-event) unread-command-events)
             (posframe-delete buffer-name)))
