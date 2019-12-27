@@ -201,7 +201,8 @@ i.e. `[语][计] dictionary' => 'dictionary'."
 (defun -region-or-word ()
   "Return word in region or word at point."
   (if (derived-mode-p 'pdf-view-mode)
-      (mapconcat 'identity (pdf-view-active-region-text) "\n")
+      (if (pdf-view-active-region-p)
+          (mapconcat 'identity (pdf-view-active-region-text) "\n"))
     (if (use-region-p)
         (buffer-substring-no-properties (region-beginning)
                                         (region-end))
