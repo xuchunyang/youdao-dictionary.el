@@ -46,6 +46,7 @@
 ;;; Code:
 (require 'json)
 (require 'url)
+(require 'url-http)
 (require 'org)
 (require 'chinese-word-at-point)
 (require 'popup)
@@ -174,7 +175,7 @@ See URL `https://github.com/xuchunyang/chinese-word-at-point.el' for more info."
     (with-current-buffer (url-retrieve-synchronously (-format-request-url word))
       (set-buffer-multibyte t)
       (goto-char (point-min))
-      (when (not (string-match "200 OK" (buffer-string)))
+      (when (not (= 200 url-http-response-status))
         (error "Problem connecting to the server"))
       (re-search-forward "^$" nil 'move)
       (setq json (json-read-from-string
