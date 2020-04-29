@@ -46,7 +46,6 @@
 ;;; Code:
 (require 'json)
 (require 'url)
-(require 'url-http)
 (require 'org)
 (require 'chinese-word-at-point)
 (require 'popup)
@@ -56,6 +55,7 @@
 (declare-function pdf-view-active-region-text "pdf-view" ())
 (declare-function pdf-view-active-region-p "pdf-view" ())
 (declare-function posframe-delete "posframe")
+(defvar url-http-response-status)
 
 (defgroup youdao-dictionary nil
   "Youdao dictionary interface for Emacs."
