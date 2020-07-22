@@ -275,7 +275,9 @@ i.e. `[语][计] dictionary' => 'dictionary'."
                          :internal-border-width 1)
           (unwind-protect
               (push (read-event) unread-command-events)
-            (posframe-delete buffer-name)))
+            (progn
+              (posframe-delete buffer-name)
+              (other-frame 0))))
       (message "Nothing to look up"))))
 
 (defun play-voice-of-current-word ()
