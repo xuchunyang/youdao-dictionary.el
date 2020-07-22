@@ -1,4 +1,4 @@
-;;; youdao-dictionary.el --- Youdao Dictionary interface for Emacs
+;;; youdao-dictionary.el --- Youdao Dictionary interface for Emacs  -*- lexical-binding: t; -*-
 
 ;; Copyright © 2015-2017 Chunyang Xu
 
@@ -149,7 +149,17 @@ See URL `https://github.com/xuchunyang/chinese-word-at-point.el' for more info."
       api-url-v3
     (format api-url (url-hexify-string query-word))))
 
-(defun -request (word)
+(defun -parse-response ()
+  "Parse response as JSON."
+  (set-buffer-multibyte t)
+  (goto-char (point-min))
+  (when (/= 200 url-http-response-status)
+    (error "Problem connecting to the server"))
+  (re-search-forward "^$" nil 'move)
+  (prog1 (json-read)
+    (kill-buffer (current-buffer))))
+
+(defun -request (word &optional callback)
   "Request WORD, return JSON as an alist if successes."
   (when (and search-history-file (file-writable-p search-history-file))
     ;; Save searching history
@@ -170,18 +180,11 @@ See URL `https://github.com/xuchunyang/chinese-word-at-point.el' for more info."
          (url-request-method (when (-request-v3-p)
                                "POST"))
          (url-request-extra-headers (when (-request-v3-p)
-                                      '(("Content-Type" . "application/x-www-form-urlencoded"))))
-         json)
-    (with-current-buffer (url-retrieve-synchronously (-format-request-url word))
-      (set-buffer-multibyte t)
-      (goto-char (point-min))
-      (when (not (= 200 url-http-response-status))
-        (error "Problem connecting to the server"))
-      (re-search-forward "^$" nil 'move)
-      (setq json (json-read-from-string
-                  (buffer-substring-no-properties (point) (point-max))))
-      (kill-buffer (current-buffer)))
-    json))
+                                      '(("Content-Type" . "application/x-www-form-urlencoded")))))
+    (if callback
+        (url-retrieve (-format-request-url word) callback)
+      (with-current-buffer (url-retrieve-synchronously (-format-request-url word))
+        (-parse-response)))))
 
 (defun -explains (json)
   "Return explains as a vector extracted from JSON."
@@ -214,12 +217,11 @@ i.e. `[语][计] dictionary' => 'dictionary'."
                         'word)
                       t))))
 
-(defun -format-result (word)
-  "Format request result of WORD."
-  (let* ((json (-request word))
-         (query        (assoc-default 'query       json)) ; string
+(defun -format-result (json)
+  "Format result in JSON."
+  (let* ((query        (assoc-default 'query       json)) ; string
          (translation  (assoc-default 'translation json)) ; array
-         (errorCode    (assoc-default 'errorCode   json)) ; number
+         (_errorCode    (assoc-default 'errorCode   json)) ; number
          (web          (assoc-default 'web         json)) ; array
          (basic        (assoc-default 'basic       json)) ; alist
          ;; construct data for display
@@ -263,7 +265,7 @@ i.e. `[语][计] dictionary' => 'dictionary'."
             (let ((inhibit-read-only t))
               (erase-buffer)
               (mode)
-              (insert (-format-result word))
+              (insert string)
               (goto-char (point-min))
               (set (make-local-variable 'youdao-dictionary-current-buffer-word) word)))
           (posframe-show buffer-name
@@ -290,19 +292,27 @@ i.e. `[语][计] dictionary' => 'dictionary'."
   (define-key mode-map "p" 'youdao-dictionary-play-voice-of-current-word)
   (define-key mode-map "y" 'youdao-dictionary-play-voice-at-point))
 
-(defun -search-and-show-in-buffer (word)
+(defun -search-and-show-in-buffer-subr (word content)
+  (with-current-buffer (get-buffer-create buffer-name)
+    (let ((inhibit-read-only t))
+      (erase-buffer)
+      (mode)
+      (insert content)
+      (goto-char (point-min))
+      (set (make-local-variable 'youdao-dictionary-current-buffer-word) word))
+    (unless (get-buffer-window (current-buffer))
+      (switch-to-buffer-other-window buffer-name))))
+
+(defun -search-and-show-in-buffer (word &optional async)
   "Search WORD and show result in `youdao-dictionary-buffer-name' buffer."
-  (if word
-      (with-current-buffer (get-buffer-create buffer-name)
-        (let ((inhibit-read-only t))
-          (erase-buffer)
-          (mode)
-          (insert (-format-result word))
-          (goto-char (point-min))
-          (set (make-local-variable 'youdao-dictionary-current-buffer-word) word))
-        (unless (get-buffer-window (current-buffer))
-          (switch-to-buffer-other-window buffer-name)))
-    (message "Nothing to look up")))
+  (unless word
+    (user-error "Nothing to look up"))
+  (if async
+      (-request word (lambda (_status)
+                       (-search-and-show-in-buffer-subr
+                        word
+                        (-format-result (-parse-response)))))
+    (-search-and-show-in-buffer-subr word (-format-result (-request word)))))
 
 :autoload
 (defun search-at-point ()
@@ -315,7 +325,7 @@ i.e. `[语][计] dictionary' => 'dictionary'."
   "Search word at point and display result with given FUNC."
   (let ((word (-region-or-word)))
     (if word
-        (funcall func (-format-result word))
+        (funcall func (-format-result (-request word)))
       (message "Nothing to look up"))))
 
 :autoload
@@ -392,6 +402,17 @@ i.e. `[语][计] dictionary' => 'dictionary'."
      (list string)))
   (-search-and-show-in-buffer query))
 
+:autoload
+(defun search-async (query)
+  "Show the explanation of QUERY from Youdao dictionary asynchronously."
+  (interactive
+   (let* ((string (or (if (use-region-p)
+                          (buffer-substring
+                           (region-beginning) (region-end))
+                        (thing-at-point 'word))
+                      (read-string "Search Youdao Dictionary: " nil 'history))))
+     (list string)))
+  (-search-and-show-in-buffer query 'async))
 
 (defun -play-voice (word)
   "Play voice of the WORD if there has mplayer or mpg123 program."
