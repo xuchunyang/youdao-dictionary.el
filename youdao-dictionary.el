@@ -325,7 +325,6 @@ i.e. `[语][计] dictionary' => 'dictionary'."
 ;;         ...
 ;;       )
 ;; '''
-:autoload
 (defun replace-unnecessary-string (text regexp-replace-list)
   "Sequncely match and replace text by regexp-replace-list"
   (if text ;; unless => if
