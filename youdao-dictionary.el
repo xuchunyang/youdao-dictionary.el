@@ -439,6 +439,8 @@ i.e. `[语][计] dictionary' => 'dictionary'."
   (let ((word (-prompt-input)))
     (-play-voice word)))
 
+(defvar -comment-strings '(";;" "#" "//")
+  "The string representing comment at the beginning of line.")
 
 )
 
@@ -449,9 +451,9 @@ i.e. `[语][计] dictionary' => 'dictionary'."
 (define-advice youdao-dictionary--region-or-word (:filter-return (word) replace-unnecessary-string)
   (when word
     (mapconcat
-     (lambda (line) (string-trim line ";; *"))
+     (lambda (line) (string-trim line (s-join " ?\\|" youdao-dictionary--comment-strings)))
      (split-string word "\n")
-     "")))
+     " ")))
 
 
 (provide 'youdao-dictionary)
