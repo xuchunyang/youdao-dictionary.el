@@ -316,22 +316,6 @@ i.e. `[语][计] dictionary' => 'dictionary'."
                         (-format-result (-parse-response)))))
     (-search-and-show-in-buffer-subr word (-format-result (-request word)))))
 
-;; text 是输入的段落
-;; regexp-replace-list形如：
-;; ```
-;;      '(
-;;         (regexp1 . replace1)
-;;         (regexp2 . replace2)
-;;         ...
-;;       )
-;; '''
-(defun replace-unnecessary-string (text regexp-replace-list)
-  "Sequncely match and replace text by regexp-replace-list"
-  (if text ;; unless => if
-    (dolist (rr regexp-replace-list text) ;; 利用`dolist`的`result`参数返回
-      (setq text (replace-regexp-in-string (car rr) (cdr rr) text)))
-    text))
-
 :autoload
 (defun search-at-point ()
   "Search word at point and display result with buffer."
@@ -343,14 +327,7 @@ i.e. `[语][计] dictionary' => 'dictionary'."
   "Search word at point and display result with given FUNC."
   (let ((word (-region-or-word)))
     (if word
-        (funcall func (-format-result
-                       (-request
-                        ;; 把youdao-dictionary源码中这里的word进行处理
-                        (replace-unnecessary-string word '(
-                                                           (" [+-]" . "\n") ;; 列表
-                                                           ("[\n\r]\\(?:;;\\|[#\\]\\)" . " ") ;; 注释
-                                                           (" +" . " ") ;; 删除多余的空格
-                                                           (".$" . ".\n")))))) ;; 句号
+        (funcall func (-format-result (-request word)))
       (message "Nothing to look up"))))
 
 :autoload
@@ -464,6 +441,17 @@ i.e. `[语][计] dictionary' => 'dictionary'."
 
 
 )
+
+;; 折行文本
+;; 有翻译问题
+;; 吗？
+
+(define-advice youdao-dictionary--region-or-word (:filter-return (word) replace-unnecessary-string)
+  (when word
+    (mapconcat
+     (lambda (line) (string-trim line ";; *"))
+     (split-string word "\n")
+     "")))
 
 
 (provide 'youdao-dictionary)
