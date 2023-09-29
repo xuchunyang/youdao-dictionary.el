@@ -11,6 +11,23 @@ Install =youdao-dictionary= from [[http://melpa.org/][MELPA]] with:
 
 =M-x package-install RET youdao-dictionary RET=
 
+** Setup
+
+Youdao discontinued the free API earlier this year (2023), so this package is no longer ready to use out of the box. You will need to [[https://ai.youdao.com/][apply]] for an API on your own.
+
+You can set your api key and secret in =~/.authinfo.gpg= or =~/.authinfo=, e.g,
+
+#+BEGIN_EXAMPLE
+machine openapi.youdao.com login 应用ID password 应用秘钥
+#+END_EXAMPLE
+
+Alternatively, you can set them in your config, e.g,
+
+#+BEGIN_SRC emacs-lisp
+(setq youdao-dictionary-app-key "应用ID"
+      youdao-dictionary-secret-key "应用秘钥")
+#+END_SRC
+
 ** Usage
 - =youdao-dictionary-search-at-point= :: Search word at point and display result
      with buffer

@@ -78,11 +78,15 @@
   "http://dict.youdao.com/dictvoice?type=2&audio=%s"
   "Youdao dictionary API for query the voice of word.")
 
-(defcustom secret-key (getenv "YOUDAO_SECRET_KEY")
+(defcustom secret-key (or (getenv "YOUDAO_SECRET_KEY")
+                          (let ((plist (car (auth-source-search :host "openapi.youdao.com" :max 1))))
+                            (plist-get plist :user)))
   "Youdao dictionary Secret Key. You can get it from ai.youdao.com."
   :type 'string)
 
-(defcustom app-key (getenv "YOUDAO_APP_KEY")
+(defcustom app-key (or (getenv "YOUDAO_APP_KEY")
+                       (let ((plist (car (auth-source-search :host "openapi.youdao.com" :max 1))))
+                         (and plist (funcall (plist-get plist :secret)))))
   "Youdao dictionary App Key. You can get it from ai.youdao.com."
   :type 'string)
 
@@ -141,7 +145,9 @@ See URL `https://github.com/xuchunyang/chinese-word-at-point.el' for more info."
   (format voice-url (url-hexify-string query-word)))
 
 (defun -request-v3-p ()
-  (and app-key secret-key))
+  (if (and app-key secret-key)
+      t
+    (user-error "You have not set the API key/secret.  See also URL `https://github.com/xuchunyang/youdao-dictionary.el#usage'.")))
 
 (defun -format-request-url (query-word)
   "Format QUERY-WORD as a HTTP request URL."
