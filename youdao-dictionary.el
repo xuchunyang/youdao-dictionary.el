@@ -5,7 +5,7 @@
 ;; Author: Chunyang Xu <xuchunyang56@gmail.com>
 ;; URL: https://github.com/xuchunyang/youdao-dictionary.el
 ;; Package-Requires: ((popup "0.5.0") (pos-tip "0.4.6") (chinese-word-at-point "0.2") (names "0.5") (emacs "24"))
-;; Version: 0.5
+;; Version: 0.5.1
 ;; Created: 11 Jan 2015
 ;; Keywords: convenience, Chinese, dictionary
 
@@ -80,13 +80,13 @@
 
 (defcustom secret-key (or (getenv "YOUDAO_SECRET_KEY")
                           (let ((plist (car (auth-source-search :host "openapi.youdao.com" :max 1))))
-                            (plist-get plist :user)))
+                            (and plist (funcall (plist-get plist :secret)))))
   "Youdao dictionary Secret Key. You can get it from ai.youdao.com."
   :type 'string)
 
 (defcustom app-key (or (getenv "YOUDAO_APP_KEY")
                        (let ((plist (car (auth-source-search :host "openapi.youdao.com" :max 1))))
-                         (and plist (funcall (plist-get plist :secret)))))
+                         (plist-get plist :user)))
   "Youdao dictionary App Key. You can get it from ai.youdao.com."
   :type 'string)
 
