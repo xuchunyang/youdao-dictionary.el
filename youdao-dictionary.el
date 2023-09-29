@@ -5,7 +5,7 @@
 ;; Author: Chunyang Xu <xuchunyang56@gmail.com>
 ;; URL: https://github.com/xuchunyang/youdao-dictionary.el
 ;; Package-Requires: ((popup "0.5.0") (pos-tip "0.4.6") (chinese-word-at-point "0.2") (names "0.5") (emacs "24"))
-;; Version: 0.4
+;; Version: 0.5
 ;; Created: 11 Jan 2015
 ;; Keywords: convenience, Chinese, dictionary
 
