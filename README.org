@@ -24,6 +24,7 @@ machine openapi.youdao.com login 应用ID password 应用秘钥
 Alternatively, you can set them in your config, e.g,
 
 #+BEGIN_SRC emacs-lisp
+;; Change 应用ID and 应用秘钥 to yours
 (setq youdao-dictionary-app-key "应用ID"
       youdao-dictionary-secret-key "应用秘钥")
 #+END_SRC
