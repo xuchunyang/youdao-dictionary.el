@@ -74,6 +74,8 @@ needed to enable Chinese word segmentation support. For more info, see
 
 ** Related tools
 
-- [[https://github.com/felixonmars/ydcv][ydcv]] :: YouDao Console Version
+- [[https://github.com/felixonmars/ydcv][ydcv]] :: YouDao Console Version in Python (youdao-dictionary.el is inspired by it)
 - [[https://github.com/afc163/fanyi][fanyi]] :: A translate tool in your command line (supports both Youdao
      and iciba)
+- [[https://github.com/lorniu/go-translate][go-translate]] :: Powerful translator on Emacs. Supports multiple translation engines such as Google, Bing, deepL, StarDict, Youdao.
+- [[https://github.com/cute-jumper/bing-dict.el][bing-dict]] :: Minimalists' English-Chinese Bing dictionary
