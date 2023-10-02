@@ -79,15 +79,11 @@
   "http://dict.youdao.com/dictvoice?type=2&audio=%s"
   "Youdao dictionary API for query the voice of word.")
 
-(defcustom secret-key (or (getenv "YOUDAO_SECRET_KEY")
-                          (let ((plist (car (auth-source-search :host "openapi.youdao.com" :max 1))))
-                            (and plist (funcall (plist-get plist :secret)))))
+(defcustom secret-key (getenv "YOUDAO_SECRET_KEY")
   "Youdao dictionary Secret Key. You can get it from ai.youdao.com."
   :type 'string)
 
-(defcustom app-key (or (getenv "YOUDAO_APP_KEY")
-                       (let ((plist (car (auth-source-search :host "openapi.youdao.com" :max 1))))
-                         (plist-get plist :user)))
+(defcustom app-key (getenv "YOUDAO_APP_KEY")
   "Youdao dictionary App Key. You can get it from ai.youdao.com."
   :type 'string)
 
@@ -122,6 +118,16 @@ See URL `https://github.com/xuchunyang/chinese-word-at-point.el' for more info."
   "Face for posframe tip."
   :group 'youdao-dictionary)
 
+(defun secret-key ()
+  (or secret-key
+      (let ((plist (car (auth-source-search :host "openapi.youdao.com" :max 1))))
+        (and plist (funcall (plist-get plist :secret))))))
+
+(defun app-key ()
+  (or app-key
+      (let ((plist (car (auth-source-search :host "openapi.youdao.com" :max 1))))
+        (plist-get plist :user))))
+
 (defun get-salt ()
   (number-to-string (random 1000)))
 
@@ -138,7 +144,7 @@ See URL `https://github.com/xuchunyang/chinese-word-at-point.el' for more info."
 
 (defun get-sign (salt curtime word)
   (let* ((input (get-input word))
-         (signstr (concat app-key input salt curtime secret-key)))
+         (signstr (concat (app-key) input salt curtime (secret-key))))
     (secure-hash 'sha256 signstr)))
 
 (defun -format-voice-url (query-word)
@@ -146,7 +152,7 @@ See URL `https://github.com/xuchunyang/chinese-word-at-point.el' for more info."
   (format voice-url (url-hexify-string query-word)))
 
 (defun -request-v3-p ()
-  (if (and app-key secret-key)
+  (if (and (app-key) (secret-key))
       t
     (user-error "You have not set the API key/secret.  See also URL `https://github.com/xuchunyang/youdao-dictionary.el#usage'.")))
 
@@ -178,7 +184,7 @@ See URL `https://github.com/xuchunyang/chinese-word-at-point.el' for more info."
                              (mapconcat #'identity (list (concat "q=" (url-hexify-string word))
                                                 (concat "from=" from)
                                                 (concat "to=" to)
-                                                (concat "appKey=" app-key)
+                                                (concat "appKey=" (app-key))
                                                 (concat "salt=" salt)
                                                 (concat "sign=" (url-hexify-string sign))
                                                 (concat "signType=" sign-type)
