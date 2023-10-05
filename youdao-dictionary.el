@@ -50,7 +50,7 @@
 (require 'chinese-word-at-point)
 (require 'popup)
 (require 'pos-tip)
-(provide 'auth-source)
+(require 'auth-source)
 (eval-when-compile (require 'names))
 
 (declare-function pdf-view-active-region-text "pdf-view" ())
